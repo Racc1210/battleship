@@ -681,11 +681,19 @@ f08loop_patron:
         LDRSB w22, [x20]        // Offset fila (signed byte)
         LDRSB w23, [x20, #1]    // Offset columna (signed byte)
         
-        // Verificar terminador (0xFF, 0xFF) - ambos deben ser -1
+        // Verificar terminador (0xFF, 0xFF) que se lee como (-1, -1)
+        // Pero (-1, -1) también es un offset válido (diagonal arriba-izquierda)
+        // Solución: verificar AMBOS a la vez primero
         CMP w22, #-1
-        BNE f08procesar_celda
+        BNE f08procesar_celda   // Si fila no es -1, procesar
         CMP w23, #-1
-        BEQ f08fin_patron       // Ambos son -1, terminar
+        BNE f08procesar_celda   // Si fila es -1 pero columna no, procesar
+        // Si llegamos aquí, ambos son -1, podría ser terminador O primera celda diagonal
+        // Verificar si es el primer offset o no
+        LDR x5, [sp, #56]       // Patrón inicial
+        CMP x20, x5             // ¿Estamos en el primer offset?
+        BEQ f08procesar_celda   // Si es el primero, es una celda válida
+        B f08fin_patron         // Si no, es el terminador
         
 f08procesar_celda:
         // Calcular coordenada objetivo

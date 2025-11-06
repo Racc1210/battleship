@@ -158,7 +158,7 @@ f02ataque_especial:
         // Usar misil especial de la IA
         LDR x0, [sp, #40]
         BL f11LanzarMisilEspecialIA
-        MOV x0, #1              // Resultado genérico para especiales
+        // x0 ahora contiene el resultado real (0=agua, 1=impacto, 2=hundido)
 
 f02procesar_resultado:
         STR x0, [sp, #32]       // Guardar resultado
@@ -168,11 +168,17 @@ f02procesar_resultado:
         BEQ f02resultado_agua_ia
         
         // Fue impacto o hundido
+        // Solo registrar si fue un disparo estándar (tiene coordenadas válidas)
+        LDR x3, [sp, #40]       // Tipo de misil
+        CMP x3, #0              // 0 = estándar
+        BNE f02no_registrar_especial
+        
         LDR x0, [sp, #16]       // Fila
         LDR x1, [sp, #24]       // Columna
         LDR x2, [sp, #32]       // Resultado
         BL f06RegistrarImpactoIA
         
+f02no_registrar_especial:
         // Mostrar mensaje
         LDR x0, [sp, #32]
         CMP x0, #2
@@ -929,10 +935,10 @@ f10usar_apache:
 // Ninguno
 // ***************************************************
 f11LanzarMisilEspecialIA:
-        stp x29, x30, [sp, -48]!
+        stp x29, x30, [sp, -64]!
         mov x29, sp
         
-        STR x0, [sp, #16]       // Tipo de misil
+        STR x0, [sp, #16]       // Tipo de misil (guardar para munición)
         
         // Generar coordenada aleatoria
         BL f04EstrategiaBusqueda
@@ -980,19 +986,24 @@ f11aplicar_patron_ia:
         // x0 ya tiene el patrón
         LDR x1, [sp, #24]       // Fila
         LDR x2, [sp, #32]       // Columna
-        STR x0, [sp, #40]       // Guardar patrón
         
-        // Aplicar patrón (versión simplificada para IA)
+        // Aplicar patrón (ahora retorna el mejor resultado)
         BL f12AplicarPatronIA
+        STR x0, [sp, #48]       // Guardar resultado del ataque en [sp,#48]
         
-        // Decrementar munición
-        LDR x0, [sp, #16]
-        SUB x0, x0, #1          // Convertir tipo a índice munición
+        // Decrementar munición usando el tipo original
+        LDR x0, [sp, #16]       // Tipo de misil original (1, 2 o 3)
+        SUB x0, x0, #1          // Convertir a índice munición (0, 1 o 2)
         BL f13DecrementarMunicionIA
+        
+        // Recuperar resultado del ataque
+        LDR x0, [sp, #48]
+        B f11fin_especial
 
 f11fin_especial:
-        MOV x0, #1              // Retornar resultado genérico
-        ldp x29, x30, [sp], 48
+        // x0 ya contiene el resultado del ataque (0=agua, 1=impacto, 2=hundido)
+        ldp x29, x30, [sp], 64
+        RET
         RET
 
 
@@ -1001,7 +1012,7 @@ f11fin_especial:
 // ******  Descripción  ******************************
 // Aplica un patrón de ataque de la IA.
 // ******  Retorno  **********************************
-// Ninguno
+// x0: Mejor resultado del patrón (0=agua, 1=impacto, 2=hundido)
 // ******  Entradas  *********************************
 // x0: Dirección del patrón
 // x1: Fila central
@@ -1010,13 +1021,15 @@ f11fin_especial:
 // Ninguno
 // ***************************************************
 f12AplicarPatronIA:
-        stp x29, x30, [sp, -64]!
+        stp x29, x30, [sp, -80]!
         mov x29, sp
         
         STR x0, [sp, #16]       // Patrón
         STR x1, [sp, #24]       // Fila central
         STR x2, [sp, #32]       // Columna central
         MOV x20, x0             // Puntero al patrón
+        MOV x21, #0             // Mejor resultado acumulado (0=agua)
+        STR x21, [sp, #56]      // Guardar mejor resultado
 
 f12loop_patron_ia:
         LDRSB w22, [x20]
@@ -1060,13 +1073,21 @@ f12procesar_celda_ia:
         LDR x2, =BarcosJugador
         MOV x5, #0              // Es IA
         BL f01ProcesarDisparoEnCelda
+        
+        // Actualizar mejor resultado
+        // Si resultado actual > mejor resultado, actualizar
+        LDR x1, [sp, #56]       // Mejor resultado actual
+        CMP x0, x1
+        BLE f12siguiente_offset_ia
+        STR x0, [sp, #56]       // Actualizar mejor resultado
 
 f12siguiente_offset_ia:
         ADD x20, x20, #2
         B f12loop_patron_ia
 
 f12fin_patron_ia:
-        ldp x29, x30, [sp], 64
+        LDR x0, [sp, #56]       // Retornar mejor resultado
+        ldp x29, x30, [sp], 80
         RET
 
 

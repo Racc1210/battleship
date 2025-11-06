@@ -176,8 +176,8 @@ ColorAmarillo: .asciz "\033[33m"
 .global MensajeBienvenida, LargoMensajeBienvenidaVal
 
 MensajeBienvenida:
-    .asciz "\n╔════════════════════════════════════════════════════════════╗\n║                                                            ║\n║           BATTLESHIP: ADVANCED MISSION                    ║\n║                                                            ║\n║              Versión ARM64 Assembly                        ║\n║                                                            ║\n╚════════════════════════════════════════════════════════════╝\n\n"
-LargoMensajeBienvenidaVal: .quad 442
+    .asciz "\n╔════════════════════════════════════════════════════════════╗\n║                                                            ║\n║            BATTLESHIP: ADVANCED MISSION                    ║\n║                                                            ║\n║              Versión ARM64 Assembly                        ║\n║                                                            ║\n╚════════════════════════════════════════════════════════════╝\n\n"
+LargoMensajeBienvenidaVal: .quad 443
 
 // ============================================
 // MENSAJE DE CRÉDITOS

@@ -407,20 +407,10 @@ LargoErrorOrigenTorpedoVal: .quad 99
 // ============================================
 .global MensajeCoordenadaAtaque, LargoMensajeCoordenadaAtaqueVal
 .global MensajeOpcionMisil, LargoMensajeOpcionMisilVal
-.global MensajeFilaAtaque, LargoMensajeFilaAtaqueVal
-.global MensajeColumnaAtaque, LargoMensajeColumnaAtaqueVal
 
 MensajeCoordenadaAtaque:
     .asciz "\n  Ingrese coordenada de ataque (ej: D7): "
 LargoMensajeCoordenadaAtaqueVal: .quad 42
-
-MensajeFilaAtaque:
-    .asciz "\n  Ingrese fila (A-J): "
-LargoMensajeFilaAtaqueVal: .quad 22
-
-MensajeColumnaAtaque:
-    .asciz "\n  Ingrese columna (1-14): "
-LargoMensajeColumnaAtaqueVal: .quad 26
 
 MensajeOpcionMisil:
     .asciz "\n  Opcion: "

@@ -36,7 +36,6 @@
 
 // Dependencias externas
 .extern f01ImprimirCadena
-.extern f02LeerCadena
 .extern f03LeerNumero
 .extern f12LeerCoordenada
 .extern f05ValidarCoordenada
@@ -44,7 +43,6 @@
 .extern f11ImprimirNumero
 .extern f09RegistrarUltimoAtaque
 .extern f12LimpiarUltimoAtaque
-.extern BufferLectura
 .extern UltimoAtaqueCeldas, UltimoAtaqueCantidad
 .extern MunicionJugador, MunicionComputadora
 .extern TableroComputadora, TableroJugador
@@ -544,84 +542,23 @@ f07solicitar_direccion:
         BL f11SeleccionarDireccionTorpedo
         STR x0, [sp, #16]       // Dirección (0=N, 1=S, 2=E, 3=O)
         
-        // Solicitar fila o columna según dirección
-        LDR x2, [sp, #16]
-        CMP x2, #0              // Norte
-        BEQ f07solicitar_columna_norte_sur
-        CMP x2, #1              // Sur
-        BEQ f07solicitar_columna_norte_sur
-        // Si no es Norte ni Sur, es Este u Oeste
-        B f07solicitar_fila_este_oeste
-
-f07solicitar_columna_norte_sur:
-        // Norte/Sur: solicitar solo columna (1-14)
-        LDR x1, =MensajeColumnaAtaque
-        LDR x2, =LargoMensajeColumnaAtaqueVal
+        // Solicitar coordenada de lanzamiento
+        LDR x1, =MensajeCoordenadaAtaque
+        LDR x2, =LargoMensajeCoordenadaAtaqueVal
         LDR x2, [x2]
         BL f01ImprimirCadena
         
-        BL f03LeerNumero         // Lee número de columna (1-14)
-        SUB x0, x0, #1           // Convertir a índice 0-13
+        BL f12LeerCoordenada
+        STR x0, [sp, #24]       // Fila origen
+        STR x1, [sp, #32]       // Columna origen
+        
+        // Validar origen y dirección
+        LDR x0, [sp, #24]
+        LDR x1, [sp, #32]
+        LDR x2, [sp, #16]
+        BL f12ValidarOrigenTorpedo
         CMP x0, #0
-        BLT f07origen_invalido
-        CMP x0, #13
-        BGT f07origen_invalido
-        
-        STR x0, [sp, #32]        // Guardar columna
-        
-        // Establecer fila según dirección
-        LDR x2, [sp, #16]
-        CMP x2, #0               // Norte: fila A (0)
-        BEQ f07set_fila_norte
-        MOV x0, #9               // Sur: fila J (9)
-        STR x0, [sp, #24]
-        B f07iniciar_torpedo
-
-f07set_fila_norte:
-        MOV x0, #0
-        STR x0, [sp, #24]
-        B f07iniciar_torpedo
-
-f07solicitar_fila_este_oeste:
-        // Este/Oeste: solicitar solo fila (A-J)
-        LDR x1, =MensajeFilaAtaque
-        LDR x2, =LargoMensajeFilaAtaqueVal
-        LDR x2, [x2]
-        BL f01ImprimirCadena
-        
-        BL f02LeerCadena          // Lee una cadena
-        
-        // Convertir letra a índice (A=0, J=9)
-        LDR x1, =BufferLectura
-        LDRB w0, [x1]             // Primer carácter
-        
-        // Convertir a mayúscula si es necesario
-        CMP w0, #'a'
-        BLT f07check_uppercase
-        CMP w0, #'z'
-        BGT f07origen_invalido
-        SUB w0, w0, #32           // Convertir a mayúscula
-
-f07check_uppercase:
-        CMP w0, #'A'
-        BLT f07origen_invalido
-        CMP w0, #'J'
-        BGT f07origen_invalido
-        SUB w0, w0, #'A'          // Convertir a índice 0-9
-        
-        STR x0, [sp, #24]         // Guardar fila
-        
-        // Establecer columna según dirección
-        LDR x2, [sp, #16]
-        CMP x2, #2                // Este: columna 14 (13)
-        BEQ f07set_col_este
-        MOV x0, #0                // Oeste: columna 1 (0)
-        STR x0, [sp, #32]
-        B f07iniciar_torpedo
-
-f07set_col_este:
-        MOV x0, #13
-        STR x0, [sp, #32]
+        BEQ f07origen_invalido
 
 f07iniciar_torpedo:
         // Recorrer en la dirección especificada

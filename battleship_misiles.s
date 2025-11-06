@@ -41,9 +41,9 @@
 .extern f05ValidarCoordenada
 .extern f01ProcesarDisparoEnCelda
 .extern f11ImprimirNumero
-.extern f09RegistrarUltimoAtaque
-.extern f12LimpiarUltimoAtaque
-.extern UltimoAtaqueCeldas, UltimoAtaqueCantidad
+// .extern f09RegistrarUltimoAtaque
+// .extern f12LimpiarUltimoAtaque
+// .extern UltimoAtaqueCeldas, UltimoAtaqueCantidad
 .extern MunicionJugador, MunicionComputadora
 .extern TableroComputadora, TableroJugador
 .extern TableroDisparosJugador, TableroDisparosComputadora
@@ -68,12 +68,12 @@
 .extern MensajeHundido, LargoMensajeHundidoVal
 .extern ErrorOpcionInvalida, LargoErrorOpcionInvalidaVal
 .extern ErrorMunicionAgotada, LargoErrorMunicionAgotadaVal
-.extern DebugMsg1, LargoDebugMsg1Val
-.extern DebugMsg2, LargoDebugMsg2Val
-.extern DebugMsg3, LargoDebugMsg3Val
-.extern DebugMsg4, LargoDebugMsg4Val
-.extern DebugMsg5, LargoDebugMsg5Val
-.extern DebugMsg6, LargoDebugMsg6Val
+// .extern DebugMsg1, LargoDebugMsg1Val
+// .extern DebugMsg2, LargoDebugMsg2Val
+// .extern DebugMsg3, LargoDebugMsg3Val
+// .extern DebugMsg4, LargoDebugMsg4Val
+// .extern DebugMsg5, LargoDebugMsg5Val
+// .extern DebugMsg6, LargoDebugMsg6Val
 .extern SaltoLinea
 
 .section .bss
@@ -341,13 +341,13 @@ f03solicitar_coord:
         MOV x5, #1              // Es jugador
         BL f01ProcesarDisparoEnCelda
         
-        // x0 tiene el resultado - guardarlo en slot diferente
+        // x0 tiene el resultado - guardarlo
         STR x0, [sp, #32]       // Resultado
         
-        // Registrar último ataque para highlighting
-        LDR x0, [sp, #16]       // Fila
-        LDR x1, [sp, #24]       // Columna
-        BL f09RegistrarUltimoAtaque
+        // TODO: Registrar último ataque para highlighting
+        // LDR x0, [sp, #16]       // Fila
+        // LDR x1, [sp, #24]       // Columna
+        // BL f09RegistrarUltimoAtaque
         
         // Recuperar resultado
         LDR x0, [sp, #32]
@@ -648,14 +648,8 @@ f07fin_torpedo:
 // Ninguno (salta celdas fuera del tablero)
 // ***************************************************
 f08AplicarPatron:
-        stp x29, x30, [sp, -128]!
+        stp x29, x30, [sp, -80]!
         mov x29, sp
-        
-        // DEBUG: Mensaje de entrada
-        LDR x1, =DebugMsg1
-        LDR x2, =LargoDebugMsg1Val
-        LDR x2, [x2]
-        BL f01ImprimirCadena
         
         // Guardar registros callee-saved
         STP x19, x20, [sp, #16]
@@ -673,11 +667,6 @@ f08AplicarPatron:
         // Desde [sp, #80] tenemos espacio para coordenadas
         
 f08loop_patron:
-        // DEBUG: Inicio de loop
-        LDR x1, =DebugMsg2
-        LDR x2, =LargoDebugMsg2Val
-        LDR x2, [x2]
-        BL f01ImprimirCadena
         
         // Leer siguiente offset
         LDRSB w22, [x20]        // Offset fila (signed byte)
@@ -690,12 +679,6 @@ f08loop_patron:
         BEQ f08fin_patron       // Ambos son -1, terminar
         
 f08procesar_celda:
-        // DEBUG: Procesando celda
-        LDR x1, =DebugMsg3
-        LDR x2, =LargoDebugMsg3Val
-        LDR x2, [x2]
-        BL f01ImprimirCadena
-        
         // Calcular coordenada objetivo
         LDR x1, [sp, #64]       // Fila central
         LDR x2, [sp, #72]       // Columna central
@@ -711,22 +694,16 @@ f08procesar_celda:
         BGT f08siguiente_offset
         CMP x2, #0
         BLT f08siguiente_offset
-        CMP x2, #13
+        CMP x2, #9
         BGT f08siguiente_offset
         
-        // Guardar coordenada en buffer local del stack
-        MOV x5, #80             // Offset base para buffer
-        LSL x6, x21, #4         // × 16 bytes por par
-        ADD x5, x5, x6
-        ADD x5, sp, x5          // Dirección en stack
-        STR x1, [x5]            // Guardar fila
-        STR x2, [x5, #8]        // Guardar columna
-        
-        // DEBUG: Antes de ProcesarDisparoEnCelda
-        LDR x1, =DebugMsg4
-        LDR x2, =LargoDebugMsg4Val
-        LDR x2, [x2]
-        BL f01ImprimirCadena
+        // Guardar coordenadas temporalmente (COMENTADO - no se usa)
+        // MOV x5, #80             // Offset base para buffer
+        // LSL x6, x21, #4         // × 16 bytes por par
+        // ADD x5, x5, x6
+        // ADD x5, sp, x5          // Dirección en stack
+        // STR x1, [x5]            // Guardar fila
+        // STR x2, [x5, #8]        // Guardar columna
         
         // Procesar disparo
         LDR x0, =TableroComputadora
@@ -736,12 +713,6 @@ f08procesar_celda:
         LDR x2, =BarcosComputadora
         MOV x5, #1
         BL f01ProcesarDisparoEnCelda
-        
-        // DEBUG: Después de ProcesarDisparoEnCelda
-        LDR x1, =DebugMsg5
-        LDR x2, =LargoDebugMsg5Val
-        LDR x2, [x2]
-        BL f01ImprimirCadena
         
         // Incrementar contador de celdas
         ADD x21, x21, #1
@@ -756,43 +727,19 @@ f08siguiente_offset:
         B f08loop_patron
 
 f08fin_patron:
-        // DEBUG: Copiando coordenadas
-        LDR x1, =DebugMsg6
-        LDR x2, =LargoDebugMsg6Val
-        LDR x2, [x2]
-        BL f01ImprimirCadena
+        // Copiar coordenadas COMENTADO (no necesitamos esto aún)
+        // LDR x5, =UltimoAtaqueCeldas
+        // MOV x6, #0              // Índice
         
-        // Copiar coordenadas del stack al array global
-        LDR x5, =UltimoAtaqueCeldas
-        MOV x6, #0              // Índice
-        
-f08copiar_coords:
-        CMP x6, x21             // ¿Copiamos todas?
-        BGE f08terminar
-        
-        // Calcular offset en stack
-        MOV x7, #80
-        LSL x8, x6, #4
-        ADD x7, x7, x8
-        ADD x7, sp, x7
-        
-        // Leer del stack
-        LDR x8, [x7]            // Fila
-        LDR x9, [x7, #8]        // Columna
-        
-        // Escribir al array global
-        LSL x10, x6, #4
-        ADD x10, x5, x10
-        STR x8, [x10]
-        STR x9, [x10, #8]
-        
-        ADD x6, x6, #1
-        B f08copiar_coords
+        // f08copiar_coords:
+        // CMP x6, x21             // ¿Copiamos todas?
+        // BGE f08terminar
+        // ... etc
         
 f08terminar:
-        // Guardar cantidad de celdas en variable global
-        LDR x0, =UltimoAtaqueCantidad
-        STR x21, [x0]
+        // Guardar cantidad de celdas (COMENTADO)
+        // LDR x0, =UltimoAtaqueCantidad
+        // STR x21, [x0]
         
         // Retornar cantidad de impactos
         MOV x0, x19
@@ -802,7 +749,7 @@ f08terminar:
         LDP x21, x22, [sp, #32]
         LDR x23, [sp, #48]
         
-        ldp x29, x30, [sp], 128
+        ldp x29, x30, [sp], 80
         RET
 
 

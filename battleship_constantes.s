@@ -178,10 +178,20 @@ ColorAmarillo: .asciz "\033[33m"
 .global DebugMsgStack2, LargoDebugMsgStack2Val
 .global DebugMsgStack3, LargoDebugMsgStack3Val
 .global DebugMsgStack4, LargoDebugMsgStack4Val
+.global DebugMsgEntry1, LargoDebugMsgEntry1Val
+.global DebugMsgEntry2, LargoDebugMsgEntry2Val
 
 MensajeDebugRetorno:
     .asciz "[DEBUG] Retorno exitoso de lanzar misil\n"
 LargoMensajeDebugRetornoVal: .quad 41
+
+DebugMsgEntry1:
+    .asciz "[DEBUG ENTRY] x29 al entrar: "
+LargoDebugMsgEntry1Val: .quad 29
+
+DebugMsgEntry2:
+    .asciz "[DEBUG ENTRY] x30 al entrar: "
+LargoDebugMsgEntry2Val: .quad 29
 
 DebugMsgStack1:
     .asciz "[DEBUG] SP actual: "

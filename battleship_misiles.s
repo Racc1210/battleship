@@ -78,6 +78,8 @@
 .extern DebugMsgStack2, LargoDebugMsgStack2Val
 .extern DebugMsgStack3, LargoDebugMsgStack3Val
 .extern DebugMsgStack4, LargoDebugMsgStack4Val
+.extern DebugMsgEntry1, LargoDebugMsgEntry1Val
+.extern DebugMsgEntry2, LargoDebugMsgEntry2Val
 .extern SaltoLinea
 
 .section .bss
@@ -314,6 +316,39 @@ f14no_disponible:
 // Reintenta si coordenada inválida
 // ***************************************************
 f03LanzarMisilEstandar:
+        // DEBUG: Imprimir x29 y x30 ANTES de guardarlos
+        // Guardar x0-x2 temporalmente
+        stp x0, x1, [sp, -32]!
+        str x2, [sp, #16]
+        
+        LDR x1, =DebugMsgEntry1
+        LDR x2, =LargoDebugMsgEntry1Val
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
+        MOV x0, x29
+        BL f11ImprimirNumero
+        
+        LDR x1, =SaltoLinea
+        MOV x2, #1
+        BL f01ImprimirCadena
+        
+        LDR x1, =DebugMsgEntry2
+        LDR x2, =LargoDebugMsgEntry2Val
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
+        MOV x0, x30
+        BL f11ImprimirNumero
+        
+        LDR x1, =SaltoLinea
+        MOV x2, #1
+        BL f01ImprimirCadena
+        
+        // Restaurar x0-x2
+        ldr x2, [sp, #16]
+        ldp x0, x1, [sp], 32
+        
         stp x29, x30, [sp, -64]!
         mov x29, sp
         

@@ -565,10 +565,10 @@ Num7:  .asciz "  7"
 Num8:  .asciz "  8"
 Num9:  .asciz "  9"
 Num10: .asciz "  10"
-Num11: .asciz "  11"
-Num12: .asciz "  12"
-Num13: .asciz "  13"
-Num14: .asciz "  14"
+Num11: .asciz " 11"
+Num12: .asciz " 12"
+Num13: .asciz " 13"
+Num14: .asciz " 14"
 
 // ============================================
 // LETRAS PARA FILAS (A-J)

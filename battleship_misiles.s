@@ -41,6 +41,9 @@
 .extern f05ValidarCoordenada
 .extern f01ProcesarDisparoEnCelda
 .extern f11ImprimirNumero
+.extern f09RegistrarUltimoAtaque
+.extern f12LimpiarUltimoAtaque
+.extern UltimoAtaqueCeldas, UltimoAtaqueCantidad
 .extern MunicionJugador, MunicionComputadora
 .extern TableroComputadora, TableroJugador
 .extern TableroDisparosJugador, TableroDisparosComputadora
@@ -64,6 +67,7 @@
 .extern MensajeImpacto, LargoMensajeImpactoVal
 .extern MensajeHundido, LargoMensajeHundidoVal
 .extern ErrorOpcionInvalida, LargoErrorOpcionInvalidaVal
+.extern ErrorMunicionAgotada, LargoErrorMunicionAgotadaVal
 .extern SaltoLinea
 
 .section .bss
@@ -101,11 +105,6 @@ f01MostrarMenuMisiles:
         BL f01ImprimirCadena
         
         // Opción 2: Misil Exocet
-        LDR x0, =MunicionJugador
-        LDR x1, [x0]            // Munición Exocet
-        CMP x1, #0
-        BLE f01skip_exocet
-        
         LDR x1, =OpcionExocet
         LDR x2, =LargoOpcionExocetVal
         LDR x2, [x2]
@@ -116,13 +115,7 @@ f01MostrarMenuMisiles:
         LDR x0, [x0]
         BL f11ImprimirNumero
         
-f01skip_exocet:
         // Opción 3: Misil Tomahawk
-        LDR x0, =MunicionJugador
-        LDR x1, [x0, #8]        // Munición Tomahawk
-        CMP x1, #0
-        BLE f01skip_tomahawk
-        
         LDR x1, =OpcionTomahawk
         LDR x2, =LargoOpcionTomahawkVal
         LDR x2, [x2]
@@ -132,13 +125,7 @@ f01skip_exocet:
         LDR x0, [x0, #8]
         BL f11ImprimirNumero
         
-f01skip_tomahawk:
         // Opción 4: Misil Apache
-        LDR x0, =MunicionJugador
-        LDR x1, [x0, #16]       // Munición Apache
-        CMP x1, #0
-        BLE f01skip_apache
-        
         LDR x1, =OpcionApache
         LDR x2, =LargoOpcionApacheVal
         LDR x2, [x2]
@@ -148,13 +135,7 @@ f01skip_tomahawk:
         LDR x0, [x0, #16]
         BL f11ImprimirNumero
         
-f01skip_apache:
         // Opción 5: Torpedo
-        LDR x0, =MunicionJugador
-        LDR x1, [x0, #24]       // Munición Torpedo
-        CMP x1, #0
-        BLE f01skip_torpedo
-        
         LDR x1, =OpcionTorpedo
         LDR x2, =LargoOpcionTorpedoVal
         LDR x2, [x2]
@@ -163,8 +144,6 @@ f01skip_apache:
         LDR x0, =MunicionJugador
         LDR x0, [x0, #24]
         BL f11ImprimirNumero
-        
-f01skip_torpedo:
         ldp x29, x30, [sp], 16
         RET
 
@@ -183,7 +162,7 @@ f01skip_torpedo:
 // Reintenta hasta obtener opción válida
 // ***************************************************
 f02SeleccionarYLanzarMisil:
-        stp x29, x30, [sp, -16]!
+        stp x29, x30, [sp, -32]!
         mov x29, sp
         
 f02solicitar_opcion:
@@ -207,11 +186,14 @@ f02solicitar_opcion:
         
         // Verificar munición disponible
         SUB x1, x0, #1          // Convertir a índice (0-4)
+        STR x0, [sp, #8]        // Guardar opción original
         BL f14VerificarMunicionDisponible
         CMP x0, #0
-        BEQ f02opcion_invalida
+        BEQ f02sin_municion
         
         // Ejecutar acción según opción
+        LDR x1, [sp, #8]        // Recuperar opción
+        SUB x1, x1, #1          // Convertir a índice
         CMP x1, #0
         BEQ f02lanzar_estandar
         CMP x1, #1
@@ -225,29 +207,36 @@ f02solicitar_opcion:
         
         B f02opcion_invalida
 
+f02sin_municion:
+        LDR x1, =ErrorMunicionAgotada
+        LDR x2, =LargoErrorMunicionAgotadaVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        B f02solicitar_opcion
+
 f02lanzar_estandar:
         BL f03LanzarMisilEstandar
-        ldp x29, x30, [sp], 16
+        ldp x29, x30, [sp], 32
         RET
 
 f02lanzar_exocet:
         BL f04LanzarMisilExocet
-        ldp x29, x30, [sp], 16
+        ldp x29, x30, [sp], 32
         RET
 
 f02lanzar_tomahawk:
         BL f05LanzarMisilTomahawk
-        ldp x29, x30, [sp], 16
+        ldp x29, x30, [sp], 32
         RET
 
 f02lanzar_apache:
         BL f06LanzarMisilApache
-        ldp x29, x30, [sp], 16
+        ldp x29, x30, [sp], 32
         RET
 
 f02lanzar_torpedo:
         BL f07LanzarTorpedo
-        ldp x29, x30, [sp], 16
+        ldp x29, x30, [sp], 32
         RET
 
 f02opcion_invalida:
@@ -280,8 +269,11 @@ f14VerificarMunicionDisponible:
         BEQ f14disponible
         
         // Cargar munición del tipo correspondiente
+        // x1 contiene índice: 1=Exocet, 2=Tomahawk, 3=Apache, 4=Torpedo
+        // Pero MunicionJugador tiene índices: 0=Exocet, 1=Tomahawk, 2=Apache, 3=Torpedo
         LDR x0, =MunicionJugador
-        LSL x2, x1, #3          // × 8 bytes
+        SUB x2, x1, #1          // Convertir índice: 1→0, 2→1, 3→2, 4→3
+        LSL x2, x2, #3          // × 8 bytes
         ADD x0, x0, x2
         LDR x3, [x0]
         
@@ -650,7 +642,7 @@ f07fin_torpedo:
 // Ninguno (salta celdas fuera del tablero)
 // ***************************************************
 f08AplicarPatron:
-        stp x29, x30, [sp, -64]!
+        stp x29, x30, [sp, -80]!
         mov x29, sp
         
         STR x0, [sp, #16]       // Patrón
@@ -658,24 +650,30 @@ f08AplicarPatron:
         STR x2, [sp, #32]       // Columna central
         MOV x19, #0             // Contador impactos
         MOV x20, x0             // Puntero al patrón
+        MOV x21, #0             // Contador de celdas atacadas
+        
+        // Limpiar registro de último ataque
+        BL f12LimpiarUltimoAtaque
         
 f08loop_patron:
         // Leer siguiente offset
-        LDRSB w21, [x20]        // Offset fila (signed byte)
-        LDRSB w22, [x20, #1]    // Offset columna (signed byte)
+        LDRSB w22, [x20]        // Offset fila (signed byte)
+        LDRSB w23, [x20, #1]    // Offset columna (signed byte)
         
         // Verificar terminador (0xFF, 0xFF) - ambos deben ser -1
-        CMP w21, #-1
-        BNE f08procesar_celda
         CMP w22, #-1
+        BNE f08procesar_celda
+        CMP w23, #-1
         BEQ f08fin_patron       // Ambos son -1, terminar
         
 f08procesar_celda:
         // Calcular coordenada objetivo
         LDR x1, [sp, #24]       // Fila central
         LDR x2, [sp, #32]       // Columna central
-        ADD x1, x1, x21         // Fila objetivo
-        ADD x2, x2, x22         // Columna objetivo
+        SXTW x3, w22            // Extender signo de offset fila a 64 bits
+        SXTW x4, w23            // Extender signo de offset columna a 64 bits
+        ADD x1, x1, x3          // Fila objetivo
+        ADD x2, x2, x4          // Columna objetivo
         
         // Validar coordenada
         CMP x1, #0
@@ -687,22 +685,30 @@ f08procesar_celda:
         CMP x2, #13
         BGT f08siguiente_offset
         
+        // Guardar coordenada en array de último ataque
+        LDR x5, =UltimoAtaqueCeldas
+        LSL x6, x21, #4         // × 16 bytes (fila de 8 bytes + columna de 8 bytes)
+        ADD x5, x5, x6
+        STR x1, [x5]            // Guardar fila
+        STR x2, [x5, #8]        // Guardar columna
+        ADD x21, x21, #1        // Incrementar contador de celdas
+        
         // Procesar disparo
-        STR x19, [sp, #40]
-        STR x20, [sp, #48]
+        STR x19, [sp, #48]
+        STR x20, [sp, #40]
+        STR x21, [sp, #56]
         
         LDR x0, =TableroComputadora
-        LDR x3, =TableroDisparosJugador
-        STR x3, [sp, #56]
         MOV x3, x1
         MOV x4, x2
-        LDR x1, [sp, #56]
+        LDR x1, =TableroDisparosJugador
         LDR x2, =BarcosComputadora
         MOV x5, #1
         BL f01ProcesarDisparoEnCelda
         
-        LDR x19, [sp, #40]
-        LDR x20, [sp, #48]
+        LDR x19, [sp, #48]
+        LDR x20, [sp, #40]
+        LDR x21, [sp, #56]
         
         // Incrementar contador si fue impacto
         CMP x0, #0
@@ -714,9 +720,13 @@ f08siguiente_offset:
         B f08loop_patron
 
 f08fin_patron:
+        // Guardar cantidad de celdas en variable global
+        LDR x0, =UltimoAtaqueCantidad
+        STR x21, [x0]
+        
         // Fin del patrón
         MOV x0, x19             // Retornar cantidad de impactos
-        ldp x29, x30, [sp], 64
+        ldp x29, x30, [sp], 80
         RET
 
 

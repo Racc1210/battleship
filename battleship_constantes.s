@@ -377,6 +377,11 @@ MensajeOpcionMisil:
     .asciz "\n  Opcion: "
 LargoMensajeOpcionMisilVal: .quad 11
 
+.global ErrorMunicionAgotada, LargoErrorMunicionAgotadaVal
+ErrorMunicionAgotada:
+    .asciz "\n No quedan ataques de este tipo. Seleccione otra opcion.\n"
+LargoErrorMunicionAgotadaVal: .quad 58
+
 // ============================================
 // MENSAJES DE RESULTADO DE ATAQUE
 // ============================================

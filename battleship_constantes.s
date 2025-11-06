@@ -177,7 +177,7 @@ ColorAmarillo: .asciz "\033[33m"
 
 MensajeBienvenida:
     .asciz "\n╔════════════════════════════════════════════════════════════╗\n║                                                            ║\n║       ⚓  BATTLESHIP: ADVANCED MISSION  ⚓                  ║\n║                                                            ║\n║              Versión ARM64 Assembly                        ║\n║                                                            ║\n╚════════════════════════════════════════════════════════════╝\n\n"
-LargoMensajeBienvenidaVal: .quad 348
+LargoMensajeBienvenidaVal: .quad 442
 
 // ============================================
 // MENSAJE DE CRÉDITOS
@@ -186,7 +186,7 @@ LargoMensajeBienvenidaVal: .quad 348
 
 MensajeCreditos:
     .asciz "    Desarrollado por: Roymar Castillo\n    Institución: Instituto Tecnológico de Costa Rica\n    Proyecto: Programación en Bajo Nivel - ARM64\n    Año: 2025\n\n"
-LargoMensajeCreditosVal: .quad 160
+LargoMensajeCreditosVal: .quad 155
 
 // ============================================
 // MENSAJE DE INSTRUCCIONES GENERALES
@@ -195,7 +195,7 @@ LargoMensajeCreditosVal: .quad 160
 
 MensajeInstrucciones:
     .asciz "╔════════════════════════════════════════════════════════════╗\n║                    ¿CÓMO JUGAR?                            ║\n╚════════════════════════════════════════════════════════════╝\n\n  OBJETIVO:\n    Hundir toda la flota enemiga antes de que destruyan la tuya\n\n  TABLERO:\n    • Dimensiones: 10 filas (A-J) × 14 columnas (1-14)\n    • Coordenadas: Letra + Número (ejemplo: D7, A1, J14)\n\n  FASES DEL JUEGO:\n    1. PREPARACIÓN: Coloca tus 5 barcos en el tablero\n    2. COMBATE: Alterna turnos con el enemigo atacando\n\n  SÍMBOLOS:\n    ~  = Agua sin explorar\n    O  = Disparo al agua (fallo)\n    B  = Tu barco (sin daño)\n    X  = Impacto en barco\n    ·  = Zona enemiga sin explorar (niebla de guerra)\n\n"
-LargoMensajeInstruccionesVal: .quad 749
+LargoMensajeInstruccionesVal: .quad 702
 
 // ============================================
 // DESCRIPCIÓN DE BARCOS
@@ -204,7 +204,7 @@ LargoMensajeInstruccionesVal: .quad 749
 
 MensajeDescripcionBarcos:
     .asciz "╔════════════════════════════════════════════════════════════╗\n║                    TUS EMBARCACIONES                       ║\n╚════════════════════════════════════════════════════════════╝\n\n  1. PORTAVIONES (5 celdas)\n     └─ Armamento: 2 Misiles Exocet (patrón especial)\n\n  2. ACORAZADO (4 celdas)\n     └─ Armamento: 1 Misil Tomahawk (área 3×3)\n\n  3. DESTRUCTOR (3 celdas)\n     └─ Armamento: 2 Misiles Apache (patrón especial)\n\n  4. SUBMARINO (3 celdas)\n     └─ Armamento: 2 Torpedos (línea completa)\n\n  5. PATRULLERO (2 celdas)\n     └─ Armamento: Misiles estándar únicamente\n\n"
-LargoMensajeDescripcionBarcosVal: .quad 642
+LargoMensajeDescripcionBarcosVal: .quad 578
 
 // ============================================
 // DESCRIPCIÓN DE MISILES
@@ -212,8 +212,8 @@ LargoMensajeDescripcionBarcosVal: .quad 642
 .global MensajeDescripcionMisiles, LargoMensajeDescripcionMisilesVal
 
 MensajeDescripcionMisiles:
-    .asciz "╔════════════════════════════════════════════════════════════╗\n║                   TIPOS DE ARMAMENTO                       ║\n╚════════════════════════════════════════════════════════════╝\n\n  🎯 MISIL ESTÁNDAR\n     • Alcance: 1 celda\n     • Munición: ILIMITADA\n     • Disponible en: Todos los barcos\n\n  🚀 MISIL EXOCET (del Portaviones)\n     • Alcance: Patrón especial de 5 celdas\n     • Munición: 2 disparos\n     • Patrones: X (esquinas) o + (cruz)\n\n  💣 MISIL TOMAHAWK (del Acorazado)\n     • Alcance: Área 3×3 (9 celdas)\n     • Munición: 1 disparo\n     • Efecto: Bombardeo masivo\n\n  ⚡ MISIL APACHE (del Destructor)\n     • Alcance: Patrón especial de 3-4 celdas\n     • Munición: 2 disparos\n     • Patrones: Horizontal o Vertical\n\n  🎯 TORPEDO (del Submarino)\n     • Alcance: Línea completa desde el borde\n     • Munición: 2 disparos\n     • Direcciones: Norte, Sur, Este, Oeste\n\n  ⚠️  NOTA: Los misiles especiales son limitados.\n            ¡Úsalos estratégicamente!\n\n"
-LargoMensajeDescripcionMisilesVal: .quad 1073
+    .asciz "╔════════════════════════════════════════════════════════════╗\n║                   TIPOS DE ARMAMENTO                       ║\n╚════════════════════════════════════════════════════════════╝\n\n   MISIL ESTÁNDAR\n      Alcance: 1 celda\n      Munición: ILIMITADA\n      Disponible en: Todos los barcos\n\n   MISIL EXOCET (del Portaviones)\n      Alcance: Patrón especial de 5 celdas\n      Munición: 2 disparos\n      Patrones: X (esquinas) o + (cruz)\n\n   MISIL TOMAHAWK (del Acorazado)\n      Alcance: Área 3×3 (9 celdas)\n      Munición: 1 disparo\n      Efecto: Bombardeo masivo\n\n   MISIL APACHE (del Destructor)\n      Alcance: Patrón especial de 3-4 celdas\n      Munición: 2 disparos\n      Patrones: Horizontal o Vertical\n\n   TORPEDO (del Submarino)\n      Alcance: Línea completa desde el borde\n      Munición: 2 disparos\n      Direcciones: Norte, Sur, Este, Oeste\n\n    NOTA: Los misiles especiales son limitados.\n            ¡Úsalos estratégicamente!\n\n"
+LargoMensajeDescripcionMisilesVal: .quad 943
 
 // ============================================
 // MENSAJE DE DESPEDIDA
@@ -222,7 +222,7 @@ LargoMensajeDescripcionMisilesVal: .quad 1073
 
 MensajeDespedida:
     .asciz "\n╔════════════════════════════════════════════════════════════╗\n║                                                            ║\n║          Gracias por jugar Battleship ARM64                ║\n║                                                            ║\n║              ¡Hasta la próxima batalla!                    ║\n║                                                            ║\n╚════════════════════════════════════════════════════════════╝\n\n"
-LargoMensajeDespedidaVal: .quad 364
+LargoMensajeDespedidaVal: .quad 443
 
 // ============================================
 // MENSAJES DE COLOCACIÓN DE BARCOS
@@ -236,27 +236,27 @@ LargoMensajeDespedidaVal: .quad 364
 
 MensajeColocacion:
     .asciz "\n╔════════════════════════════════════════╗\n║      FASE DE COLOCACIÓN DE BARCOS      ║\n╚════════════════════════════════════════╝\n\n"
-LargoMensajeColocacionVal: .quad 128
+LargoMensajeColocacionVal: .quad 131
 
 MensajePortaviones:
-    .asciz "\n► PORTAVIONES (5 celdas)\n  Misiles: 2 Exocet\n"
-LargoMensajePortavionesVal: .quad 52
+    .asciz "\n PORTAVIONES (5 celdas)\n  Misiles: 2 Exocet\n"
+LargoMensajePortavionesVal: .quad 45
 
 MensajeAcorazado:
-    .asciz "\n► ACORAZADO (4 celdas)\n  Misiles: 1 Tomahawk (área 3x3)\n"
-LargoMensajeAcorazadoVal: .quad 62
+    .asciz "\n ACORAZADO (4 celdas)\n  Misiles: 1 Tomahawk (área 3x3)\n"
+LargoMensajeAcorazadoVal: .quad 56
 
 MensajeDestructor:
-    .asciz "\n► DESTRUCTOR (3 celdas)\n  Misiles: 2 Apache\n"
-LargoMensajeDestructorVal: .quad 51
+    .asciz "\n DESTRUCTOR (3 celdas)\n  Misiles: 2 Apache\n"
+LargoMensajeDestructorVal: .quad 44
 
 MensajeSubmarino:
-    .asciz "\n► SUBMARINO (3 celdas)\n  Armas: 2 Torpedos\n"
-LargoMensajeSubmarinoVal: .quad 49
+    .asciz "\n SUBMARINO (3 celdas)\n  Armas: 2 Torpedos\n"
+LargoMensajeSubmarinoVal: .quad 43
 
 MensajePatrullero:
-    .asciz "\n► PATRULLERO (2 celdas)\n  Misiles: Solo estándar\n"
-LargoMensajePatrulleroVal: .quad 54
+    .asciz "\n PATRULLERO (2 celdas)\n  Misiles: Solo estándar\n"
+LargoMensajePatrulleroVal: .quad 49
 
 // ============================================
 // MENSAJES DE SOLICITUD DE COORDENADAS
@@ -282,24 +282,24 @@ LargoMensajePopaVal: .quad 39
 .global ErrorSolapamiento, LargoErrorSolapamientoVal
 
 ErrorFormatoCoord:
-    .asciz "\n✖ ERROR: Formato inválido. Use letra (A-J) + número (1-14)\n"
-LargoErrorFormatoCoorVal: .quad 62
+    .asciz "\n ERROR: Formato inválido. Use letra (A-J) + número (1-14)\n"
+LargoErrorFormatoCoorVal: .quad 59
 
 ErrorFueraRango:
-    .asciz "\n✖ ERROR: Coordenada fuera del tablero (A-J, 1-14)\n"
-LargoErrorFueraRangoVal: .quad 53
+    .asciz "\n ERROR: Coordenada fuera del tablero (A-J, 1-14)\n"
+LargoErrorFueraRangoVal: .quad 50
 
 ErrorOrientacion:
-    .asciz "\n✖ ERROR: El barco debe estar horizontal o vertical (no diagonal)\n"
-LargoErrorOrientacionVal: .quad 67
+    .asciz "\n ERROR: El barco debe estar horizontal o vertical (no diagonal)\n"
+LargoErrorOrientacionVal: .quad 65
 
 ErrorDistancia:
-    .asciz "\n✖ ERROR: La distancia no corresponde al tamaño del barco\n"
-LargoErrorDistanciaVal: .quad 60
+    .asciz "\n ERROR: La distancia no corresponde al tamaño del barco\n"
+LargoErrorDistanciaVal: .quad 57
 
 ErrorSolapamiento:
-    .asciz "\n✖ ERROR: El barco se solapa con otra embarcación existente\n"
-LargoErrorSolapamientoVal: .quad 62
+    .asciz "\n ERROR: El barco se solapa con otra embarcación existente\n"
+LargoErrorSolapamientoVal: .quad 59
 
 // ============================================
 // MENSAJES DE COMBATE - MENÚ DE MISILES
@@ -313,27 +313,27 @@ LargoErrorSolapamientoVal: .quad 62
 
 MenuMisiles:
     .asciz "\n╔════════════════════════════════════════╗\n║        SELECCIONE TIPO DE MISIL        ║\n╚════════════════════════════════════════╝\n\n"
-LargoMenuMisilesVal: .quad 128
+LargoMenuMisilesVal: .quad 131
 
 OpcionEstandar:
     .asciz "  1. Misil Estándar (1 celda) [ILIMITADO]\n"
-LargoOpcionEstandarVal: .quad 43
+LargoOpcionEstandarVal: .quad 42
 
 OpcionExocet:
     .asciz "  2. Misil Exocet (patrón especial) [Disponibles: "
-LargoOpcionExocetVal: .quad 51
+LargoOpcionExocetVal: .quad 50
 
 OpcionTomahawk:
     .asciz "  3. Misil Tomahawk (área 3x3) [Disponibles: "
-LargoOpcionTomahawkVal: .quad 46
+LargoOpcionTomahawkVal: .quad 45
 
 OpcionApache:
     .asciz "  4. Misil Apache (patrón especial) [Disponibles: "
-LargoOpcionApacheVal: .quad 51
+LargoOpcionApacheVal: .quad 50
 
 OpcionTorpedo:
     .asciz "  5. Torpedo (línea recta) [Disponibles: "
-LargoOpcionTorpedoVal: .quad 42
+LargoOpcionTorpedoVal: .quad 41
 
 // ============================================
 // MENSAJES DE SELECCIÓN DE PATRÓN
@@ -343,11 +343,11 @@ LargoOpcionTorpedoVal: .quad 42
 
 MenuPatronExocet:
     .asciz "\n  Seleccione patrón de Exocet:\n    1. Patrón X (esquinas)\n    2. Patrón + (cruz)\n  Opción: "
-LargoMenuPatronExocetVal: .quad 95
+LargoMenuPatronExocetVal: .quad 92
 
 MenuPatronApache:
     .asciz "\n  Seleccione patrón de Apache:\n    1. Patrón horizontal\n    2. Patrón vertical\n  Opción: "
-LargoMenuPatronApacheVal: .quad 95
+LargoMenuPatronApacheVal: .quad 90
 
 // ============================================
 // MENSAJES DE TORPEDO
@@ -356,12 +356,12 @@ LargoMenuPatronApacheVal: .quad 95
 .global ErrorOrigenTorpedo, LargoErrorOrigenTorpedoVal
 
 MenuDireccionTorpedo:
-    .asciz "\n  Seleccione dirección del torpedo:\n    1. Norte (↑)\n    2. Sur (↓)\n    3. Este (→)\n    4. Oeste (←)\n  Opción: "
-LargoMenuDireccionTorpedoVal: .quad 119
+    .asciz "\n  Seleccione dirección del torpedo:\n    1. Norte \n    2. Sur \n    3. Este\n    4. Oeste \n  Opción: "
+LargoMenuDireccionTorpedoVal: .quad 99
 
 ErrorOrigenTorpedo:
-    .asciz "\n✖ ERROR: El torpedo debe lanzarse desde el borde del tablero\n         en la dirección especificada\n"
-LargoErrorOrigenTorpedoVal: .quad 106
+    .asciz "\n ERROR: El torpedo debe lanzarse desde el borde del tablero\n         en la dirección especificada\n"
+LargoErrorOrigenTorpedoVal: .quad 99
 
 // ============================================
 // MENSAJES DE SOLICITUD DE ATAQUE
@@ -386,20 +386,20 @@ LargoMensajeOpcionMisilVal: .quad 11
 .global MensajeDisparoRepetido, LargoMensajeDisparoRepetidoVal
 
 MensajeAgua:
-    .asciz "\n💧 AGUA - No hay nada aquí\n"
-LargoMensajeAguaVal: .quad 30
+    .asciz "\n AGUA - No hay nada aquí\n"
+LargoMensajeAguaVal: .quad 26
 
 MensajeImpacto:
-    .asciz "\n💥 ¡IMPACTO! Has golpeado un barco enemigo\n"
-LargoMensajeImpactoVal: .quad 46
+    .asciz "\n ¡IMPACTO! Has golpeado un barco enemigo\n"
+LargoMensajeImpactoVal: .quad 42
 
 MensajeHundido:
-    .asciz "\n🔥 ¡BARCO HUNDIDO! Has destruido una embarcación enemiga\n"
-LargoMensajeHundidoVal: .quad 60
+    .asciz "\n ¡BARCO HUNDIDO! Has destruido una embarcación enemiga\n"
+LargoMensajeHundidoVal: .quad 56
 
 MensajeDisparoRepetido:
-    .asciz "\n⚠ Ya has disparado a esta coordenada anteriormente\n"
-LargoMensajeDisparoRepetidoVal: .quad 54
+    .asciz "\n Ya has disparado a esta coordenada anteriormente\n"
+LargoMensajeDisparoRepetidoVal: .quad 51
 
 // ============================================
 // MENSAJES DE TURNO
@@ -409,11 +409,11 @@ LargoMensajeDisparoRepetidoVal: .quad 54
 
 MensajeTurnoJugador:
     .asciz "\n╔════════════════════════════════════════╗\n║            TU TURNO                    ║\n╚════════════════════════════════════════╝\n"
-LargoMensajeTurnoJugadorVal: .quad 123
+LargoMensajeTurnoJugadorVal: .quad 130
 
 MensajeTurnoEnemigo:
     .asciz "\n╔════════════════════════════════════════╗\n║         TURNO DEL ENEMIGO              ║\n╚════════════════════════════════════════╝\n"
-LargoMensajeTurnoEnemigoVal: .quad 123
+LargoMensajeTurnoEnemigoVal: .quad 130
 
 // ============================================
 // MENSAJES DE ATAQUE ENEMIGO
@@ -427,12 +427,12 @@ MensajeEnemigoDispara:
 LargoMensajeEnemigoDisparaVal: .quad 31
 
 MensajeEnemigoImpacto:
-    .asciz "\n💥 El enemigo ha impactado uno de tus barcos en "
-LargoMensajeEnemigoImpactoVal: .quad 50
+    .asciz "\n El enemigo ha impactado uno de tus barcos en "
+LargoMensajeEnemigoImpactoVal: .quad 47
 
 MensajeEnemigoHundio:
-    .asciz "\n🔥 ¡El enemigo ha hundido uno de tus barcos!\n"
-LargoMensajeEnemigoHundioVal: .quad 48
+    .asciz "\n ¡El enemigo ha hundido uno de tus barcos!\n"
+LargoMensajeEnemigoHundioVal: .quad 44
 
 // ============================================
 // MENSAJES DE FIN DE JUEGO
@@ -441,12 +441,12 @@ LargoMensajeEnemigoHundioVal: .quad 48
 .global MensajeDerrota, LargoMensajeDerrotaVal
 
 MensajeVictoria:
-    .asciz "\n╔════════════════════════════════════════╗\n║                                        ║\n║          🎉 ¡VICTORIA! 🎉              ║\n║                                        ║\n║  Has hundido toda la flota enemiga     ║\n║                                        ║\n╚════════════════════════════════════════╝\n\n"
-LargoMensajeVictoriaVal: .quad 256
+    .asciz "\n╔════════════════════════════════════════╗\n║                                        ║\n║           ¡VICTORIA!               ║\n║                                        ║\n║  Has hundido toda la flota enemiga     ║\n║                                        ║\n╚════════════════════════════════════════╝\n\n"
+LargoMensajeVictoriaVal: .quad 299
 
 MensajeDerrota:
-    .asciz "\n╔════════════════════════════════════════╗\n║                                        ║\n║            💀 DERROTA 💀               ║\n║                                        ║\n║   Toda tu flota ha sido destruida      ║\n║                                        ║\n╚════════════════════════════════════════╝\n\n"
-LargoMensajeDerrotaVal: .quad 251
+    .asciz "\n╔════════════════════════════════════════╗\n║                                        ║\n║             DERROTA                ║\n║                                        ║\n║   Toda tu flota ha sido destruida      ║\n║                                        ║\n╚════════════════════════════════════════╝\n\n"
+LargoMensajeDerrotaVal: .quad 299
 
 // ============================================
 // MENSAJES DE SALIDA
@@ -455,7 +455,7 @@ LargoMensajeDerrotaVal: .quad 251
 
 MensajeSalir:
     .asciz "\n  Gracias por jugar Battleship: Advanced Mission\n  Saliendo del juego...\n\n"
-LargoMensajeSalirVal: .quad 76
+LargoMensajeSalirVal: .quad 75
 
 // ============================================
 // MENSAJES DE TABLERO
@@ -465,11 +465,11 @@ LargoMensajeSalirVal: .quad 76
 
 TituloTableroPropio:
     .asciz "\n  ══════════ TU FLOTA ══════════\n"
-LargoTituloTableroPropioVal: .quad 36
+LargoTituloTableroPropioVal: .quad 34
 
 TituloTableroEnemigo:
     .asciz "\n  ═════════ FLOTA ENEMIGA ═════════\n"
-LargoTituloTableroEnemigoVal: .quad 39
+LargoTituloTableroEnemigoVal: .quad 37
 
 // ============================================
 // NÚMEROS PARA COLUMNAS (1-14)
@@ -517,16 +517,16 @@ LetraJ: .asciz "J"
 .global ErrorEntradaVacia, LargoErrorEntradaVaciaVal
 
 ErrorGenerico:
-    .asciz "\n✖ ERROR: Ha ocurrido un error inesperado\n"
-LargoErrorGenericoVal: .quad 44
+    .asciz "\n ERROR: Ha ocurrido un error inesperado\n"
+LargoErrorGenericoVal: .quad 41
 
 ErrorOpcionInvalida:
-    .asciz "\n✖ ERROR: Opción inválida. Intente de nuevo.\n"
-LargoErrorOpcionInvalidaVal: .quad 47
+    .asciz "\n ERROR: Opción inválida. Intente de nuevo.\n"
+LargoErrorOpcionInvalidaVal: .quad 44
 
 ErrorEntradaVacia:
-    .asciz "\n✖ ERROR: La entrada no puede estar vacía\n"
-LargoErrorEntradaVaciaVal: .quad 44
+    .asciz "\n ERROR: La entrada no puede estar vacía\n"
+LargoErrorEntradaVaciaVal: .quad 41
 
 // ============================================
 // MENSAJE DE PRESIONAR ENTER

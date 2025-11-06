@@ -642,7 +642,7 @@ f07fin_torpedo:
 // Ninguno (salta celdas fuera del tablero)
 // ***************************************************
 f08AplicarPatron:
-        stp x29, x30, [sp, -96]!
+        stp x29, x30, [sp, -128]!
         mov x29, sp
         
         // Guardar registros callee-saved
@@ -654,11 +654,11 @@ f08AplicarPatron:
         STR x1, [sp, #64]       // Fila central
         STR x2, [sp, #72]       // Columna central
         MOV x19, #0             // Contador impactos
-        MOV x20, x0             // Puntero al patrón
+        MOV x20, x0             // Puntero al patrón inicial
         MOV x21, #0             // Contador de celdas atacadas
         
-        // Limpiar registro de último ataque
-        BL f12LimpiarUltimoAtaque
+        // Buffer local para coordenadas (en stack)
+        // Desde [sp, #80] tenemos espacio para coordenadas
         
 f08loop_patron:
         // Leer siguiente offset
@@ -690,18 +690,15 @@ f08procesar_celda:
         CMP x2, #13
         BGT f08siguiente_offset
         
-        // Guardar coordenada en array de último ataque
-        LDR x5, =UltimoAtaqueCeldas
-        LSL x6, x21, #4         // × 16 bytes (fila de 8 bytes + columna de 8 bytes)
+        // Guardar coordenada en buffer local del stack
+        MOV x5, #80             // Offset base para buffer
+        LSL x6, x21, #4         // × 16 bytes por par
         ADD x5, x5, x6
+        ADD x5, sp, x5          // Dirección en stack
         STR x1, [x5]            // Guardar fila
         STR x2, [x5, #8]        // Guardar columna
-        ADD x21, x21, #1        // Incrementar contador de celdas
         
-        // Procesar disparo (guardar x1, x2 que tienen fila/columna objetivo)
-        STR x1, [sp, #80]       // Fila objetivo
-        STR x2, [sp, #88]       // Columna objetivo
-        
+        // Procesar disparo
         LDR x0, =TableroComputadora
         MOV x3, x1
         MOV x4, x2
@@ -710,8 +707,8 @@ f08procesar_celda:
         MOV x5, #1
         BL f01ProcesarDisparoEnCelda
         
-        // x19, x20, x21 se preservan automáticamente (callee-saved)
-        // No necesitamos recuperarlos
+        // Incrementar contador de celdas
+        ADD x21, x21, #1
         
         // Incrementar contador si fue impacto
         CMP x0, #0
@@ -723,6 +720,34 @@ f08siguiente_offset:
         B f08loop_patron
 
 f08fin_patron:
+        // Copiar coordenadas del stack al array global
+        LDR x5, =UltimoAtaqueCeldas
+        MOV x6, #0              // Índice
+        
+f08copiar_coords:
+        CMP x6, x21             // ¿Copiamos todas?
+        BGE f08terminar
+        
+        // Calcular offset en stack
+        MOV x7, #80
+        LSL x8, x6, #4
+        ADD x7, x7, x8
+        ADD x7, sp, x7
+        
+        // Leer del stack
+        LDR x8, [x7]            // Fila
+        LDR x9, [x7, #8]        // Columna
+        
+        // Escribir al array global
+        LSL x10, x6, #4
+        ADD x10, x5, x10
+        STR x8, [x10]
+        STR x9, [x10, #8]
+        
+        ADD x6, x6, #1
+        B f08copiar_coords
+        
+f08terminar:
         // Guardar cantidad de celdas en variable global
         LDR x0, =UltimoAtaqueCantidad
         STR x21, [x0]
@@ -735,7 +760,7 @@ f08fin_patron:
         LDP x21, x22, [sp, #32]
         LDR x23, [sp, #48]
         
-        ldp x29, x30, [sp], 96
+        ldp x29, x30, [sp], 128
         RET
 
 

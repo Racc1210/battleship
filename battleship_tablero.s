@@ -52,6 +52,10 @@
 .extern Num1, Num2, Num3, Num4, Num5, Num6, Num7
 .extern Num8, Num9, Num10, Num11, Num12, Num13, Num14
 
+// Declarar globales ANTES de las secciones
+.global UltimoAtaqueFila, UltimoAtaqueColumna, UltimoAtaqueCantidad
+.global UltimoAtaqueCeldas
+
 // Sección de datos no inicializados
 .section .bss
 
@@ -65,8 +69,6 @@ TableroDisparosComputadora: .skip 1120 // Registro de disparos de la IA
 BufferTemp:              .skip 8
 
 // Tracking del último ataque para highlighting
-.global UltimoAtaqueFila, UltimoAtaqueColumna, UltimoAtaqueCantidad
-.global UltimoAtaqueCeldas  // Array de pares (fila,columna)
 UltimoAtaqueFila:        .skip 8     // Fila del último ataque individual
 UltimoAtaqueColumna:     .skip 8     // Columna del último ataque individual
 UltimoAtaqueCantidad:    .skip 8     // Cantidad de celdas en último ataque

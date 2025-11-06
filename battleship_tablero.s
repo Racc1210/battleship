@@ -635,10 +635,10 @@ f03ImprimirTableroEnemigo:
         BL f01ImprimirCadena
         
         LDR x1, =Num7
-        MOV x2, #2
+        MOV x2, #3
         BL f01ImprimirCadena
         LDR x1, =Espacio
-        MOV x2, #3
+        MOV x2, #1
         BL f01ImprimirCadena
         
         LDR x1, =Num8

@@ -171,6 +171,15 @@ ColorAzul:     .asciz "\033[34m"
 ColorAmarillo: .asciz "\033[33m"
 
 // ============================================
+// MENSAJE DE DEBUG
+// ============================================
+.global MensajeDebugRetorno, LargoMensajeDebugRetornoVal
+
+MensajeDebugRetorno:
+    .asciz "[DEBUG] Retorno exitoso de lanzar misil\n"
+LargoMensajeDebugRetornoVal: .quad 41
+
+// ============================================
 // MENSAJE DE BIENVENIDA
 // ============================================
 .global MensajeBienvenida, LargoMensajeBienvenidaVal

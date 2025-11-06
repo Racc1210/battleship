@@ -41,6 +41,7 @@
 .extern MensajeTurnoEnemigo, LargoMensajeTurnoEnemigoVal
 .extern MensajeVictoria, LargoMensajeVictoriaVal
 .extern MensajeDerrota, LargoMensajeDerrotaVal
+.extern MensajeDebugRetorno, LargoMensajeDebugRetornoVal
 .extern SaltoLinea
 
 .section .bss
@@ -229,6 +230,12 @@ f03TurnoJugador:
         
         // Seleccionar y lanzar misil
         BL f02SeleccionarYLanzarMisil
+        
+        // DEBUG: Mensaje después de lanzar misil
+        LDR x1, =MensajeDebugRetorno
+        LDR x2, =LargoMensajeDebugRetornoVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
         
         // Mostrar tablero enemigo actualizado
         BL f03ImprimirTableroEnemigo

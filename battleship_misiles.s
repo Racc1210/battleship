@@ -569,29 +569,29 @@ f07solicitar_direccion:
         
 f07recorrer_torpedo:
         // Avanzar según dirección
-        CMP x21, #0             // Norte (fila--)
+        CMP x21, #0             // Norte (viene desde arriba → avanza hacia abajo)
         BEQ f07avanzar_norte
-        CMP x21, #1             // Sur (fila++)
+        CMP x21, #1             // Sur (viene desde abajo → avanza hacia arriba)
         BEQ f07avanzar_sur
-        CMP x21, #2             // Este (columna++)
+        CMP x21, #2             // Este (viene desde derecha → avanza hacia izquierda)
         BEQ f07avanzar_este
-        CMP x21, #3             // Oeste (columna--)
+        CMP x21, #3             // Oeste (viene desde izquierda → avanza hacia derecha)
         BEQ f07avanzar_oeste
         
 f07avanzar_norte:
-        SUB x19, x19, #1
+        ADD x19, x19, #1        // Norte: incrementar fila (A→B→C...)
         B f07verificar_celda
 
 f07avanzar_sur:
-        ADD x19, x19, #1
+        SUB x19, x19, #1        // Sur: decrementar fila (J→I→H...)
         B f07verificar_celda
 
 f07avanzar_este:
-        ADD x20, x20, #1
+        SUB x20, x20, #1        // Este: decrementar columna (14→13→12...)
         B f07verificar_celda
 
 f07avanzar_oeste:
-        SUB x20, x20, #1
+        ADD x20, x20, #1        // Oeste: incrementar columna (1→2→3...)
 
 f07verificar_celda:
         // Verificar límites del tablero 10x14 (filas 0-9, columnas 0-13)
@@ -703,7 +703,7 @@ f08procesar_celda:
         BGT f08siguiente_offset
         CMP x2, #0
         BLT f08siguiente_offset
-        CMP x2, #9
+        CMP x2, #13             // Tablero 10x14: columnas 0-13
         BGT f08siguiente_offset
         
         // Guardar coordenadas en buffer local del stack
@@ -941,28 +941,28 @@ f12ValidarOrigenTorpedo:
         BEQ f12validar_oeste
         
 f12validar_norte:
-        CMP x0, #9
+        CMP x0, #0              // Norte: desde fila A (0) viaja hacia abajo (SUR)
         BNE f12invalido
         MOV x0, #1
         ldp x29, x30, [sp], 16
         RET
 
 f12validar_sur:
-        CMP x0, #0
+        CMP x0, #9              // Sur: desde fila J (9) viaja hacia arriba (NORTE)
         BNE f12invalido
         MOV x0, #1
         ldp x29, x30, [sp], 16
         RET
 
 f12validar_este:
-        CMP x1, #13             // Columna 13 (borde derecho del tablero 10x14)
+        CMP x1, #13             // Este: desde columna 14 (13) viaja hacia izquierda (OESTE)
         BNE f12invalido
         MOV x0, #1
         ldp x29, x30, [sp], 16
         RET
 
 f12validar_oeste:
-        CMP x1, #0              // Columna 0 (borde izquierdo)
+        CMP x1, #0              // Oeste: desde columna 1 (0) viaja hacia derecha (ESTE)
         BNE f12invalido
         MOV x0, #1
         ldp x29, x30, [sp], 16

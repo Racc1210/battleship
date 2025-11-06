@@ -106,10 +106,10 @@ PATRON_APACHE_2: .quad 2  // Patrón vertical
 // ============================================
 .global DIR_NORTE, DIR_SUR, DIR_ESTE, DIR_OESTE
 
-DIR_NORTE: .quad 0  // Desde borde inferior hacia arriba
-DIR_SUR:   .quad 1  // Desde borde superior hacia abajo
-DIR_ESTE:  .quad 2  // Desde borde izquierdo hacia derecha
-DIR_OESTE: .quad 3  // Desde borde derecho hacia izquierda
+DIR_NORTE: .quad 0  // Torpedo viene desde arriba (fila A) y viaja hacia abajo
+DIR_SUR:   .quad 1  // Torpedo viene desde abajo (fila J) y viaja hacia arriba
+DIR_ESTE:  .quad 2  // Torpedo viene desde derecha (columna 14) y viaja hacia izquierda
+DIR_OESTE: .quad 3  // Torpedo viene desde izquierda (columna 1) y viaja hacia derecha
 
 // ============================================
 // ORIENTACIONES DE BARCOS
@@ -395,8 +395,8 @@ LargoMenuPatronApacheVal: .quad 90
 .global ErrorOrigenTorpedo, LargoErrorOrigenTorpedoVal
 
 MenuDireccionTorpedo:
-    .asciz "\n  Seleccione direccion del torpedo:\n    1. Norte \n    2. Sur \n    3. Este\n    4. Oeste \n  Opcion: "
-LargoMenuDireccionTorpedoVal: .quad 99
+    .asciz "\n  Seleccione direccion del torpedo:\n    1. Norte (desde fila A hacia abajo)\n    2. Sur (desde fila J hacia arriba)\n    3. Este (desde columna 14 hacia izquierda)\n    4. Oeste (desde columna 1 hacia derecha)\n  Opcion: "
+LargoMenuDireccionTorpedoVal: .quad 191
 
 ErrorOrigenTorpedo:
     .asciz "\n ERROR: El torpedo debe lanzarse desde el borde del tablero\n         en la direccion especificada\n"
@@ -564,11 +564,11 @@ Num6:  .asciz "  6"
 Num7:  .asciz "  7"
 Num8:  .asciz "  8"
 Num9:  .asciz "  9"
-Num10: .asciz " 10"
-Num11: .asciz " 11"
-Num12: .asciz " 12"
-Num13: .asciz " 13"
-Num14: .asciz " 14"
+Num10: .asciz "  10"
+Num11: .asciz "  11"
+Num12: .asciz "  12"
+Num13: .asciz "  13"
+Num14: .asciz "  14"
 
 // ============================================
 // LETRAS PARA FILAS (A-J)

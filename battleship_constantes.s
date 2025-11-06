@@ -381,8 +381,8 @@ LargoOpcionTorpedoVal: .quad 41
 .global MenuPatronApache, LargoMenuPatronApacheVal
 
 MenuPatronExocet:
-    .asciz "\n  Seleccione patron de Exocet:\n    1. Patron X (esquinas)\n    2. Patron + (cruz)\n  Opcion: "
-LargoMenuPatronExocetVal: .quad 92
+    .asciz "\n  Seleccione patron de Exocet:\n    1. Patron + (cruz)\n    2. Patron X (diagonal)\n  Opcion: "
+LargoMenuPatronExocetVal: .quad 94
 
 MenuPatronApache:
     .asciz "\n  Seleccione patron de Apache:\n    1. Patron horizontal\n    2. Patron vertical\n  Opcion: "
@@ -556,19 +556,19 @@ LargoTituloTableroEnemigoVal: .quad 37
 .global Num8, Num9, Num10, Num11, Num12, Num13, Num14
 
 Num1:  .asciz "1"
-Num2:  .asciz " 2"
-Num3:  .asciz " 3"
-Num4:  .asciz " 4"
-Num5:  .asciz " 5"
-Num6:  .asciz " 6"
-Num7:  .asciz " 7"
-Num8:  .asciz " 8"
-Num9:  .asciz " 9"
-Num10: .asciz "10"
-Num11: .asciz "11"
-Num12: .asciz "12"
-Num13: .asciz "13"
-Num14: .asciz "14"
+Num2:  .asciz "  2"
+Num3:  .asciz "  3"
+Num4:  .asciz "  4"
+Num5:  .asciz "  5"
+Num6:  .asciz "  6"
+Num7:  .asciz "  7"
+Num8:  .asciz "  8"
+Num9:  .asciz "  9"
+Num10: .asciz " 10"
+Num11: .asciz " 11"
+Num12: .asciz " 12"
+Num13: .asciz " 13"
+Num14: .asciz " 14"
 
 // ============================================
 // LETRAS PARA FILAS (A-J)

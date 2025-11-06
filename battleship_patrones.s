@@ -17,36 +17,17 @@
 .section .data
 
 // ============================================
-// PATRÓN EXOCET 1 - Forma de X (esquinas)
+// PATRÓN EXOCET 1 - Forma de + (cruz)
 // ============================================
 // Patrón visual:
-//   X . X
-//   . X .
-//   X . X
-// Impacta 5 celdas: las 4 esquinas y el centro
+//   . O .
+//   O O O
+//   . O .
+// Impacta 5 celdas: centro + arriba, abajo, izquierda, derecha
 // ============================================
 .global PatronExocet1
 
 PatronExocet1:
-    .byte -1, -1    // Arriba-izquierda
-    .byte -1,  1    // Arriba-derecha
-    .byte  0,  0    // Centro (coordenada de disparo)
-    .byte  1, -1    // Abajo-izquierda
-    .byte  1,  1    // Abajo-derecha
-    .byte 0xFF, 0xFF // Terminador
-
-// ============================================
-// PATRÓN EXOCET 2 - Forma de + (cruz)
-// ============================================
-// Patrón visual:
-//   . X .
-//   X X X
-//   . X .
-// Impacta 5 celdas: arriba, abajo, izquierda, derecha y centro
-// ============================================
-.global PatronExocet2
-
-PatronExocet2:
     .byte -1,  0    // Arriba
     .byte  0, -1    // Izquierda
     .byte  0,  0    // Centro (coordenada de disparo)
@@ -55,31 +36,49 @@ PatronExocet2:
     .byte 0xFF, 0xFF // Terminador
 
 // ============================================
+// PATRÓN EXOCET 2 - Forma de X (diagonal)
+// ============================================
+// Patrón visual:
+//   O . O
+//   . O .
+//   O . O
+// Impacta 5 celdas: centro + las 4 esquinas diagonales
+// ============================================
+.global PatronExocet2
+
+PatronExocet2:
+    .byte -1, -1    // Arriba-izquierda
+    .byte -1,  1    // Arriba-derecha
+    .byte  0,  0    // Centro (coordenada de disparo)
+    .byte  1, -1    // Abajo-izquierda
+    .byte  1,  1    // Abajo-derecha
+    .byte 0xFF, 0xFF // Terminador
+
+// ============================================
 // PATRÓN APACHE 1 - Horizontal
 // ============================================
 // Patrón visual:
-//   . X .
-//   X X X
 //   . . .
-// Impacta 4 celdas: fila central (3 celdas) + celda arriba
+//   O O O
+//   . . .
+// Impacta 3 celdas: línea horizontal (izquierda, centro, derecha)
 // ============================================
 .global PatronApache1
 
 PatronApache1:
-    .byte -1,  0    // Arriba-centro
-    .byte  0, -1    // Centro-izquierda
+    .byte  0, -1    // Izquierda
     .byte  0,  0    // Centro (coordenada de disparo)
-    .byte  0,  1    // Centro-derecha
+    .byte  0,  1    // Derecha
     .byte 0xFF, 0xFF // Terminador
 
 // ============================================
 // PATRÓN APACHE 2 - Vertical
 // ============================================
 // Patrón visual:
-//   . X .
-//   . X .
-//   . X .
-// Impacta 3 celdas: línea vertical desde arriba
+//   O . .
+//   O . .
+//   O . .
+// Impacta 3 celdas: línea vertical (arriba, centro, abajo)
 // ============================================
 .global PatronApache2
 
@@ -133,9 +132,9 @@ TablaPatrones:
 .global TamanoPatronApache1, TamanoPatronApache2
 .global TamanoPatronTomahawk
 
-TamanoPatronExocet1:  .quad 5  // 5 celdas (esquinas + centro)
-TamanoPatronExocet2:  .quad 5  // 5 celdas (cruz)
-TamanoPatronApache1:  .quad 4  // 4 celdas (horizontal)
+TamanoPatronExocet1:  .quad 5  // 5 celdas (cruz +)
+TamanoPatronExocet2:  .quad 5  // 5 celdas (diagonal X)
+TamanoPatronApache1:  .quad 3  // 3 celdas (horizontal)
 TamanoPatronApache2:  .quad 3  // 3 celdas (vertical)
 TamanoPatronTomahawk: .quad 9  // 9 celdas (3×3)
 

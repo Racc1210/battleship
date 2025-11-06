@@ -174,10 +174,30 @@ ColorAmarillo: .asciz "\033[33m"
 // MENSAJE DE DEBUG
 // ============================================
 .global MensajeDebugRetorno, LargoMensajeDebugRetornoVal
+.global DebugMsgStack1, LargoDebugMsgStack1Val
+.global DebugMsgStack2, LargoDebugMsgStack2Val
+.global DebugMsgStack3, LargoDebugMsgStack3Val
+.global DebugMsgStack4, LargoDebugMsgStack4Val
 
 MensajeDebugRetorno:
     .asciz "[DEBUG] Retorno exitoso de lanzar misil\n"
 LargoMensajeDebugRetornoVal: .quad 41
+
+DebugMsgStack1:
+    .asciz "[DEBUG] SP actual: "
+LargoDebugMsgStack1Val: .quad 19
+
+DebugMsgStack2:
+    .asciz "[DEBUG] x29 guardado en [sp,#0]: "
+LargoDebugMsgStack2Val: .quad 33
+
+DebugMsgStack3:
+    .asciz "[DEBUG] x30 guardado en [sp,#8]: "
+LargoDebugMsgStack3Val: .quad 33
+
+DebugMsgStack4:
+    .asciz "[DEBUG] Intentando retornar...\n"
+LargoDebugMsgStack4Val: .quad 31
 
 // ============================================
 // MENSAJE DE BIENVENIDA

@@ -74,6 +74,10 @@
 // .extern DebugMsg4, LargoDebugMsg4Val
 // .extern DebugMsg5, LargoDebugMsg5Val
 // .extern DebugMsg6, LargoDebugMsg6Val
+.extern DebugMsgStack1, LargoDebugMsgStack1Val
+.extern DebugMsgStack2, LargoDebugMsgStack2Val
+.extern DebugMsgStack3, LargoDebugMsgStack3Val
+.extern DebugMsgStack4, LargoDebugMsgStack4Val
 .extern SaltoLinea
 
 .section .bss
@@ -365,6 +369,52 @@ f03resultado_agua:
         LDR x2, =LargoMensajeAguaVal
         LDR x2, [x2]
         BL f01ImprimirCadena
+        
+        // DEBUG: Imprimir valores del stack antes de retornar
+        LDR x1, =DebugMsgStack1
+        LDR x2, =LargoDebugMsgStack1Val
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
+        // Imprimir sp actual
+        MOV x0, sp
+        BL f11ImprimirNumero
+        
+        LDR x1, =SaltoLinea
+        MOV x2, #1
+        BL f01ImprimirCadena
+        
+        // Imprimir valores en stack
+        LDR x1, =DebugMsgStack2
+        LDR x2, =LargoDebugMsgStack2Val
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
+        LDR x0, [sp, #0]    // x29 guardado
+        BL f11ImprimirNumero
+        
+        LDR x1, =SaltoLinea
+        MOV x2, #1
+        BL f01ImprimirCadena
+        
+        LDR x1, =DebugMsgStack3
+        LDR x2, =LargoDebugMsgStack3Val
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
+        LDR x0, [sp, #8]    // x30 guardado (dirección de retorno)
+        BL f11ImprimirNumero
+        
+        LDR x1, =SaltoLinea
+        MOV x2, #1
+        BL f01ImprimirCadena
+        
+        // Ahora intentar retornar
+        LDR x1, =DebugMsgStack4
+        LDR x2, =LargoDebugMsgStack4Val
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
         // Cargar resultado directamente aquí
         MOV x0, #0
         ldp x29, x30, [sp], 64

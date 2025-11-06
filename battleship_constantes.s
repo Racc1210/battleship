@@ -383,6 +383,40 @@ ErrorMunicionAgotada:
 LargoErrorMunicionAgotadaVal: .quad 58
 
 // ============================================
+// MENSAJES DE DEBUG
+// ============================================
+.global DebugMsg1, LargoDebugMsg1Val
+.global DebugMsg2, LargoDebugMsg2Val
+.global DebugMsg3, LargoDebugMsg3Val
+.global DebugMsg4, LargoDebugMsg4Val
+.global DebugMsg5, LargoDebugMsg5Val
+.global DebugMsg6, LargoDebugMsg6Val
+
+DebugMsg1:
+    .asciz "\n[DEBUG] Entrando a f08AplicarPatron\n"
+LargoDebugMsg1Val: .quad 36
+
+DebugMsg2:
+    .asciz "\n[DEBUG] Inicio del loop de patron\n"
+LargoDebugMsg2Val: .quad 34
+
+DebugMsg3:
+    .asciz "\n[DEBUG] Procesando celda\n"
+LargoDebugMsg3Val: .quad 25
+
+DebugMsg4:
+    .asciz "\n[DEBUG] Llamando a ProcesarDisparoEnCelda\n"
+LargoDebugMsg4Val: .quad 42
+
+DebugMsg5:
+    .asciz "\n[DEBUG] Despues de ProcesarDisparoEnCelda\n"
+LargoDebugMsg5Val: .quad 42
+
+DebugMsg6:
+    .asciz "\n[DEBUG] Fin del patron, copiando coordenadas\n"
+LargoDebugMsg6Val: .quad 45
+
+// ============================================
 // MENSAJES DE RESULTADO DE ATAQUE
 // ============================================
 .global MensajeAgua, LargoMensajeAguaVal

@@ -68,6 +68,12 @@
 .extern MensajeHundido, LargoMensajeHundidoVal
 .extern ErrorOpcionInvalida, LargoErrorOpcionInvalidaVal
 .extern ErrorMunicionAgotada, LargoErrorMunicionAgotadaVal
+.extern DebugMsg1, LargoDebugMsg1Val
+.extern DebugMsg2, LargoDebugMsg2Val
+.extern DebugMsg3, LargoDebugMsg3Val
+.extern DebugMsg4, LargoDebugMsg4Val
+.extern DebugMsg5, LargoDebugMsg5Val
+.extern DebugMsg6, LargoDebugMsg6Val
 .extern SaltoLinea
 
 .section .bss
@@ -393,7 +399,7 @@ f03fin:
 // Ninguno
 // ***************************************************
 f04LanzarMisilExocet:
-        stp x29, x30, [sp, -32]!
+        stp x29, x30, [sp, -48]!
         mov x29, sp
         
         // Seleccionar patrón
@@ -420,7 +426,7 @@ f04LanzarMisilExocet:
         MOV x0, #0              // Índice Exocet
         BL f13DecrementarMunicion
         
-        ldp x29, x30, [sp], 32
+        ldp x29, x30, [sp], 48
         RET
 
 
@@ -436,7 +442,7 @@ f04LanzarMisilExocet:
 // Ninguno
 // ***************************************************
 f05LanzarMisilTomahawk:
-        stp x29, x30, [sp, -32]!
+        stp x29, x30, [sp, -48]!
         mov x29, sp
         
         // Solicitar coordenada central
@@ -459,7 +465,7 @@ f05LanzarMisilTomahawk:
         MOV x0, #1              // Índice Tomahawk
         BL f13DecrementarMunicion
         
-        ldp x29, x30, [sp], 32
+        ldp x29, x30, [sp], 48
         RET
 
 
@@ -475,7 +481,7 @@ f05LanzarMisilTomahawk:
 // Ninguno
 // ***************************************************
 f06LanzarMisilApache:
-        stp x29, x30, [sp, -32]!
+        stp x29, x30, [sp, -48]!
         mov x29, sp
         
         // Seleccionar patrón
@@ -502,7 +508,7 @@ f06LanzarMisilApache:
         MOV x0, #2              // Índice Apache
         BL f13DecrementarMunicion
         
-        ldp x29, x30, [sp], 32
+        ldp x29, x30, [sp], 48
         RET
 
 
@@ -645,6 +651,12 @@ f08AplicarPatron:
         stp x29, x30, [sp, -128]!
         mov x29, sp
         
+        // DEBUG: Mensaje de entrada
+        LDR x1, =DebugMsg1
+        LDR x2, =LargoDebugMsg1Val
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
         // Guardar registros callee-saved
         STP x19, x20, [sp, #16]
         STP x21, x22, [sp, #32]
@@ -661,6 +673,12 @@ f08AplicarPatron:
         // Desde [sp, #80] tenemos espacio para coordenadas
         
 f08loop_patron:
+        // DEBUG: Inicio de loop
+        LDR x1, =DebugMsg2
+        LDR x2, =LargoDebugMsg2Val
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
         // Leer siguiente offset
         LDRSB w22, [x20]        // Offset fila (signed byte)
         LDRSB w23, [x20, #1]    // Offset columna (signed byte)
@@ -672,6 +690,12 @@ f08loop_patron:
         BEQ f08fin_patron       // Ambos son -1, terminar
         
 f08procesar_celda:
+        // DEBUG: Procesando celda
+        LDR x1, =DebugMsg3
+        LDR x2, =LargoDebugMsg3Val
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
         // Calcular coordenada objetivo
         LDR x1, [sp, #64]       // Fila central
         LDR x2, [sp, #72]       // Columna central
@@ -698,6 +722,12 @@ f08procesar_celda:
         STR x1, [x5]            // Guardar fila
         STR x2, [x5, #8]        // Guardar columna
         
+        // DEBUG: Antes de ProcesarDisparoEnCelda
+        LDR x1, =DebugMsg4
+        LDR x2, =LargoDebugMsg4Val
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
         // Procesar disparo
         LDR x0, =TableroComputadora
         MOV x3, x1
@@ -706,6 +736,12 @@ f08procesar_celda:
         LDR x2, =BarcosComputadora
         MOV x5, #1
         BL f01ProcesarDisparoEnCelda
+        
+        // DEBUG: Después de ProcesarDisparoEnCelda
+        LDR x1, =DebugMsg5
+        LDR x2, =LargoDebugMsg5Val
+        LDR x2, [x2]
+        BL f01ImprimirCadena
         
         // Incrementar contador de celdas
         ADD x21, x21, #1
@@ -720,6 +756,12 @@ f08siguiente_offset:
         B f08loop_patron
 
 f08fin_patron:
+        // DEBUG: Copiando coordenadas
+        LDR x1, =DebugMsg6
+        LDR x2, =LargoDebugMsg6Val
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
         // Copiar coordenadas del stack al array global
         LDR x5, =UltimoAtaqueCeldas
         MOV x6, #0              // Índice

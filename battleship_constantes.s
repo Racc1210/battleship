@@ -266,11 +266,11 @@ LargoMensajePatrulleroVal: .quad 54
 
 MensajeProa:
     .asciz "  Ingrese coordenada de PROA (ej: A1): "
-LargoMensajePraoVal: .quad 41
+LargoMensajePraoVal: .quad 39
 
 MensajePopa:
     .asciz "  Ingrese coordenada de POPA (ej: A5): "
-LargoMensajePopaVal: .quad 41
+LargoMensajePopaVal: .quad 39
 
 // ============================================
 // MENSAJES DE ERROR - COLOCACIÓN

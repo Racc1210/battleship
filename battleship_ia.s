@@ -628,7 +628,7 @@ f08hay_solapamiento_ia:
 // Ninguno
 // ***************************************************
 f09ColocarBarcosIACompleto:
-        stp x29, x30, [sp, -48]!
+        stp x29, x30, [sp, -80]!
         mov x29, sp
         
         // Colocar 5 barcos con tamaños: 5, 4, 3, 3, 2
@@ -741,7 +741,46 @@ f09gen_horizontal_ia:
         BEQ f09intentar
 
 f09marcar_barco_ia:
-        // Marcar celdas en TableroComputadora
+        // Primero registrar el barco en BarcosComputadora
+        LDR x0, =BarcosComputadora
+        LDR x19, [sp, #16]      // Índice del barco
+        MOV x4, #40             // Tamaño de cada estructura Barco
+        MUL x5, x19, x4
+        ADD x0, x0, x5          // x0 apunta al barco actual
+        
+        // Guardar tipo
+        STR x19, [x0]           // Offset 0: tipo
+        
+        // Guardar tamaño
+        LDR x6, [sp, #24]
+        STR x6, [x0, #8]        // Offset 8: tamaño
+        
+        // Guardar fila_inicio, columna_inicio, fila_fin, columna_fin, orientación
+        LDR x7, [sp, #32]       // Orientación
+        STR x7, [x0, #16]       // Offset 16: orientación
+        
+        CMP x7, #0
+        BEQ f09registrar_h_ia
+        
+f09registrar_v_ia:
+        LDR x8, [sp, #40]       // Fila inicio
+        LDR x9, [sp, #48]       // Columna
+        LDR x10, [sp, #56]      // Fila fin
+        
+        STR x8, [x0, #24]       // Offset 24: fila_inicio
+        STR x9, [x0, #32]       // Offset 32: columna_inicio (igual a columna_fin)
+        B f09marcar_celdas_ia
+        
+f09registrar_h_ia:
+        LDR x8, [sp, #40]       // Fila
+        LDR x9, [sp, #48]       // Columna inicio
+        LDR x10, [sp, #56]      // Columna fin
+        
+        STR x8, [x0, #24]       // Offset 24: fila_inicio (igual a fila_fin)
+        STR x9, [x0, #32]       // Offset 32: columna_inicio
+
+f09marcar_celdas_ia:
+        // Ahora marcar celdas en TableroComputadora
         LDR x21, [sp, #32]      // Orientación
         CMP x21, #0
         BEQ f09marcar_h_ia
@@ -796,7 +835,7 @@ f09siguiente_barco:
         B f09loop_barcos
 
 f09fin_colocacion:
-        ldp x29, x30, [sp], 48
+        ldp x29, x30, [sp], 80
         RET
 
 

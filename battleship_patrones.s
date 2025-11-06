@@ -117,7 +117,7 @@ PatronTomahawk:
 // ============================================
 // Facilita el acceso a los patrones mediante índice
 // ============================================
-.global TablaPunterosPatro nes
+.global TablaPunterosPatrones
 
 TablaPatrones:
     .quad PatronExocet1     // Índice 0

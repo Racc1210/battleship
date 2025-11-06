@@ -312,7 +312,7 @@ f14no_disponible:
 // Reintenta si coordenada inválida
 // ***************************************************
 f03LanzarMisilEstandar:
-        stp x29, x30, [sp, -32]!
+        stp x29, x30, [sp, -48]!
         mov x29, sp
         
 f03solicitar_coord:
@@ -325,14 +325,14 @@ f03solicitar_coord:
         // Leer coordenada
         BL f12LeerCoordenada
         
-        // Validar
+        // Guardar coordenadas ANTES de validar
+        STR x0, [sp, #16]       // Fila
+        STR x1, [sp, #24]       // Columna
+        
+        // Validar (x0 y x1 ya tienen fila y columna)
         BL f05ValidarCoordenada
         CMP x0, #0
         BEQ f03solicitar_coord
-        
-        // Guardar coordenadas
-        STR x0, [sp, #16]       // Fila
-        STR x1, [sp, #24]       // Columna
         
         // Procesar disparo
         LDR x0, =TableroComputadora
@@ -343,8 +343,18 @@ f03solicitar_coord:
         MOV x5, #1              // Es jugador
         BL f01ProcesarDisparoEnCelda
         
+        // x0 tiene el resultado - guardarlo en slot diferente
+        STR x0, [sp, #32]       // Resultado
+        
+        // Registrar último ataque para highlighting
+        LDR x0, [sp, #16]       // Fila
+        LDR x1, [sp, #24]       // Columna
+        BL f09RegistrarUltimoAtaque
+        
+        // Recuperar resultado
+        LDR x0, [sp, #32]
+        
         // Mostrar resultado
-        STR x0, [sp, #16]
         CMP x0, #0
         BEQ f03resultado_agua
         CMP x0, #1
@@ -373,8 +383,8 @@ f03resultado_hundido:
         BL f01ImprimirCadena
 
 f03fin:
-        LDR x0, [sp, #16]
-        ldp x29, x30, [sp], 32
+        LDR x0, [sp, #32]
+        ldp x29, x30, [sp], 48
         RET
 
 
@@ -654,10 +664,13 @@ f08loop_patron:
         LDRSB w21, [x20]        // Offset fila (signed byte)
         LDRSB w22, [x20, #1]    // Offset columna (signed byte)
         
-        // Verificar terminador (0xFF, 0xFF)
+        // Verificar terminador (0xFF, 0xFF) - ambos deben ser -1
         CMP w21, #-1
-        BEQ f08verificar_terminador
+        BNE f08procesar_celda
+        CMP w22, #-1
+        BEQ f08fin_patron       // Ambos son -1, terminar
         
+f08procesar_celda:
         // Calcular coordenada objetivo
         LDR x1, [sp, #24]       // Fila central
         LDR x2, [sp, #32]       // Columna central
@@ -700,10 +713,7 @@ f08siguiente_offset:
         ADD x20, x20, #2        // Avanzar al siguiente par
         B f08loop_patron
 
-f08verificar_terminador:
-        CMP w22, #-1
-        BNE f08siguiente_offset
-        
+f08fin_patron:
         // Fin del patrón
         MOV x0, x19             // Retornar cantidad de impactos
         ldp x29, x30, [sp], 64

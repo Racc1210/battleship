@@ -24,6 +24,10 @@
 .global f06ObtenerEstadoCelda
 .global f07ActualizarCelda
 .global f08CalcularIndice
+.global f09RegistrarUltimoAtaque
+.global f10RegistrarAtaqueMultiple
+.global f11EsCeldaUltimoAtaque
+.global f12LimpiarUltimoAtaque
 .global TableroJugador
 .global TableroComputadora
 .global TableroDisparosJugador
@@ -59,6 +63,20 @@ TableroDisparosComputadora: .skip 1120 // Registro de disparos de la IA
 
 // Buffer temporal para conversión de números
 BufferTemp:              .skip 8
+
+// Tracking del último ataque para highlighting
+.global UltimoAtaqueFila, UltimoAtaqueColumna, UltimoAtaqueCantidad
+.global UltimoAtaqueCeldas  // Array de pares (fila,columna)
+UltimoAtaqueFila:        .skip 8     // Fila del último ataque individual
+UltimoAtaqueColumna:     .skip 8     // Columna del último ataque individual
+UltimoAtaqueCantidad:    .skip 8     // Cantidad de celdas en último ataque
+UltimoAtaqueCeldas:      .skip 360   // Max 45 pares de coordenadas (fila,columna) × 8 bytes
+
+// Códigos de color ANSI
+.section .data
+.global ColorAmarillo, ColorReset
+ColorAmarillo:  .asciz "\033[33m"   // Amarillo para última celda atacada
+ColorReset:     .asciz "\033[0m"    // Reset color
 
 
 .section .text
@@ -731,20 +749,87 @@ f03loop_columnas:
         B f03imprimir_desconocida
         
 f03imprimir_desconocida:
+        // Verificar si es parte del último ataque
+        LDR x0, [sp, #16]       // fila
+        LDR x1, [sp, #32]       // columna
+        BL f11EsCeldaUltimoAtaque
+        CMP x0, #1
+        BNE f03desc_sin_color
+        
+        // Imprimir con color amarillo
+        LDR x1, =ColorAmarillo
+        MOV x2, #5              // Longitud "\033[33m"
+        BL f01ImprimirCadena
+        
+f03desc_sin_color:
         LDR x1, =SimboloDesconocida
         MOV x2, #1
         BL f01ImprimirCadena
+        
+        // Reset color si fue coloreado
+        LDR x0, [sp, #16]
+        LDR x1, [sp, #32]
+        BL f11EsCeldaUltimoAtaque
+        CMP x0, #1
+        BNE f03siguiente_columna
+        LDR x1, =ColorReset
+        MOV x2, #4
+        BL f01ImprimirCadena
+        
         B f03siguiente_columna
         
 f03imprimir_enemigo_agua:
+        // Verificar si es parte del último ataque
+        LDR x0, [sp, #16]
+        LDR x1, [sp, #32]
+        BL f11EsCeldaUltimoAtaque
+        CMP x0, #1
+        BNE f03agua_sin_color
+        
+        LDR x1, =ColorAmarillo
+        MOV x2, #5
+        BL f01ImprimirCadena
+        
+f03agua_sin_color:
         LDR x1, =SimboloEnemigoAgua
         MOV x2, #1
         BL f01ImprimirCadena
+        
+        LDR x0, [sp, #16]
+        LDR x1, [sp, #32]
+        BL f11EsCeldaUltimoAtaque
+        CMP x0, #1
+        BNE f03siguiente_columna
+        LDR x1, =ColorReset
+        MOV x2, #4
+        BL f01ImprimirCadena
+        
         B f03siguiente_columna
         
 f03imprimir_enemigo_barco:
+        // Verificar si es parte del último ataque
+        LDR x0, [sp, #16]
+        LDR x1, [sp, #32]
+        BL f11EsCeldaUltimoAtaque
+        CMP x0, #1
+        BNE f03barco_sin_color
+        
+        LDR x1, =ColorAmarillo
+        MOV x2, #5
+        BL f01ImprimirCadena
+        
+f03barco_sin_color:
         LDR x1, =SimboloEnemigoBarco
         MOV x2, #1
+        BL f01ImprimirCadena
+        
+        LDR x0, [sp, #16]
+        LDR x1, [sp, #32]
+        BL f11EsCeldaUltimoAtaque
+        CMP x0, #1
+        BNE f03siguiente_columna
+        LDR x1, =ColorReset
+        MOV x2, #4
         BL f01ImprimirCadena
         
 f03siguiente_columna:
@@ -799,6 +884,187 @@ f04ImprimirAmbosTableros:
         RET
 
 
+// ******  Nombre  ***********************************
+// f09RegistrarUltimoAtaque
+// ******  Descripción  ******************************
+// Registra las coordenadas del último ataque para
+// poder resaltarlas con color en la próxima impresión.
+// ******  Retorno  **********************************
+// Ninguno
+// ******  Entradas  *********************************
+// x0: Fila
+// x1: Columna
+// ******  Errores  **********************************
+// Ninguno
+// ***************************************************
+.global f09RegistrarUltimoAtaque
+f09RegistrarUltimoAtaque:
+        stp x29, x30, [sp, -16]!
+        mov x29, sp
+        
+        // Guardar coordenada simple (para ataques de 1 celda)
+        LDR x2, =UltimoAtaqueFila
+        STR x0, [x2]
+        LDR x2, =UltimoAtaqueColumna
+        STR x1, [x2]
+        
+        // Registrar en array de celdas
+        LDR x2, =UltimoAtaqueCeldas
+        STR x0, [x2]            // Fila
+        STR x1, [x2, #8]        // Columna
+        
+        // Establecer cantidad = 1
+        LDR x2, =UltimoAtaqueCantidad
+        MOV x3, #1
+        STR x3, [x2]
+        
+        ldp x29, x30, [sp], 16
+        RET
+
+
+// ******  Nombre  ***********************************
+// f10RegistrarAtaqueMultiple
+// ******  Descripción  ******************************
+// Registra múltiples coordenadas de un ataque de
+// patrón para resaltarlas con color.
+// ******  Retorno  **********************************
+// Ninguno
+// ******  Entradas  *********************************
+// x0: Dirección del array de coordenadas [(fila,columna),...]
+// x1: Cantidad de pares
+// ******  Errores  **********************************
+// Ninguno
+// ***************************************************
+.global f10RegistrarAtaqueMultiple
+f10RegistrarAtaqueMultiple:
+        stp x29, x30, [sp, -32]!
+        mov x29, sp
+        
+        STR x0, [sp, #16]       // Array fuente
+        STR x1, [sp, #24]       // Cantidad
+        
+        // Guardar cantidad
+        LDR x2, =UltimoAtaqueCantidad
+        STR x1, [x2]
+        
+        // Copiar coordenadas al array global
+        LDR x3, =UltimoAtaqueCeldas
+        MOV x4, #0              // Índice
+        
+f10loop_copiar:
+        LDR x5, [sp, #24]
+        CMP x4, x5
+        BGE f10fin
+        
+        LDR x0, [sp, #16]       // Array fuente
+        LSL x6, x4, #4          // × 16 (2 coords × 8 bytes)
+        ADD x0, x0, x6
+        
+        LDR x7, [x0]            // Fila
+        LDR x8, [x0, #8]        // Columna
+        
+        LSL x6, x4, #4
+        ADD x9, x3, x6
+        STR x7, [x9]
+        STR x8, [x9, #8]
+        
+        ADD x4, x4, #1
+        B f10loop_copiar
+        
+f10fin:
+        ldp x29, x30, [sp], 32
+        RET
+
+
+// ******  Nombre  ***********************************
+// f11EsCeldaUltimoAtaque
+// ******  Descripción  ******************************
+// Verifica si una coordenada fue parte del último ataque.
+// ******  Retorno  **********************************
+// x0: 1 si fue parte del último ataque, 0 si no
+// ******  Entradas  *********************************
+// x0: Fila a verificar
+// x1: Columna a verificar
+// ******  Errores  **********************************
+// Ninguno
+// ***************************************************
+.global f11EsCeldaUltimoAtaque
+f11EsCeldaUltimoAtaque:
+        stp x29, x30, [sp, -32]!
+        mov x29, sp
+        
+        STR x0, [sp, #16]       // Fila buscada
+        STR x1, [sp, #24]       // Columna buscada
+        
+        // Obtener cantidad de celdas en último ataque
+        LDR x2, =UltimoAtaqueCantidad
+        LDR x2, [x2]
+        
+        CMP x2, #0
+        BLE f11no_encontrada
+        
+        // Buscar en array
+        LDR x3, =UltimoAtaqueCeldas
+        MOV x4, #0              // Índice
+        
+f11loop_buscar:
+        CMP x4, x2
+        BGE f11no_encontrada
+        
+        LSL x5, x4, #4          // × 16
+        ADD x6, x3, x5
+        
+        LDR x7, [x6]            // Fila del ataque
+        LDR x8, [x6, #8]        // Columna del ataque
+        
+        LDR x9, [sp, #16]       // Fila buscada
+        LDR x10, [sp, #24]      // Columna buscada
+        
+        CMP x7, x9
+        BNE f11siguiente
+        CMP x8, x10
+        BEQ f11encontrada
+        
+f11siguiente:
+        ADD x4, x4, #1
+        B f11loop_buscar
+        
+f11encontrada:
+        MOV x0, #1
+        ldp x29, x30, [sp], 32
+        RET
+        
+f11no_encontrada:
+        MOV x0, #0
+        ldp x29, x30, [sp], 32
+        RET
+
+
+// ******  Nombre  ***********************************
+// f12LimpiarUltimoAtaque
+// ******  Descripción  ******************************
+// Limpia el registro del último ataque.
+// ******  Retorno  **********************************
+// Ninguno
+// ******  Entradas  *********************************
+// Ninguna
+// ******  Errores  **********************************
+// Ninguno
+// ***************************************************
+.global f12LimpiarUltimoAtaque
+f12LimpiarUltimoAtaque:
+        stp x29, x30, [sp, -16]!
+        mov x29, sp
+        
+        LDR x0, =UltimoAtaqueCantidad
+        MOV x1, #0
+        STR x1, [x0]
+        
+        ldp x29, x30, [sp], 16
+        RET
+
+
 // ============================================
 // FIN DEL ARCHIVO
 // ============================================
+

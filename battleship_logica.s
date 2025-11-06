@@ -171,6 +171,10 @@ f02loop_juego:
         
         // Verificar victoria de la IA
         BL f04VerificarFinDeJuego
+        LDR x0, =JuegoTerminado
+        LDR x0, [x0]
+        CMP x0, #0
+        BNE f02fin_juego
         
         // Pequeña pausa
         LDR x1, =MensajePresionarEnter

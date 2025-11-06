@@ -564,7 +564,8 @@ f07solicitar_direccion:
         LDR x19, [sp, #24]      // Fila actual
         LDR x20, [sp, #32]      // Columna actual
         LDR x21, [sp, #16]      // Dirección
-        MOV x22, #0             // Resultado
+        MOV x22, #0             // Resultado inicial (AGUA)
+        STR x22, [sp, #40]      // Guardar resultado inicial
         
 f07recorrer_torpedo:
         // Avanzar según dirección
@@ -593,7 +594,7 @@ f07avanzar_oeste:
         SUB x20, x20, #1
 
 f07verificar_celda:
-        // Verificar límites
+        // Verificar límites del tablero 10x14 (filas 0-9, columnas 0-13)
         CMP x19, #0
         BLT f07fin_torpedo
         CMP x19, #9
@@ -656,7 +657,7 @@ f07fin_torpedo:
 // Ninguno (salta celdas fuera del tablero)
 // ***************************************************
 f08AplicarPatron:
-        stp x29, x30, [sp, -80]!
+        stp x29, x30, [sp, -160]!    // Aumentar a 160 para tener espacio para buffer
         mov x29, sp
         
         // Guardar registros callee-saved
@@ -705,13 +706,13 @@ f08procesar_celda:
         CMP x2, #9
         BGT f08siguiente_offset
         
-        // Guardar coordenadas temporalmente (COMENTADO - no se usa)
-        // MOV x5, #80             // Offset base para buffer
-        // LSL x6, x21, #4         // × 16 bytes por par
-        // ADD x5, x5, x6
-        // ADD x5, sp, x5          // Dirección en stack
-        // STR x1, [x5]            // Guardar fila
-        // STR x2, [x5, #8]        // Guardar columna
+        // Guardar coordenadas en buffer local del stack
+        MOV x5, #80             // Offset base para buffer  
+        LSL x6, x21, #4         // × 16 bytes por par
+        ADD x5, x5, x6
+        ADD x5, sp, x5          // Dirección en stack
+        STR x1, [x5]            // Guardar fila
+        STR x2, [x5, #8]        // Guardar columna
         
         // Procesar disparo
         LDR x0, =TableroComputadora
@@ -735,19 +736,37 @@ f08siguiente_offset:
         B f08loop_patron
 
 f08fin_patron:
-        // Copiar coordenadas COMENTADO (no necesitamos esto aún)
-        // LDR x5, =UltimoAtaqueCeldas
-        // MOV x6, #0              // Índice
+        // Copiar coordenadas del stack al array global
+        LDR x5, =UltimoAtaqueCeldas
+        MOV x6, #0              // Índice
         
-        // f08copiar_coords:
-        // CMP x6, x21             // ¿Copiamos todas?
-        // BGE f08terminar
-        // ... etc
+f08copiar_coords:
+        CMP x6, x21             // ¿Copiamos todas?
+        BGE f08terminar
+        
+        // Calcular offset en stack
+        MOV x7, #80
+        LSL x8, x6, #4
+        ADD x7, x7, x8
+        ADD x7, sp, x7
+        
+        // Leer del stack
+        LDR x8, [x7]            // Fila
+        LDR x9, [x7, #8]        // Columna
+        
+        // Escribir al array global
+        LSL x10, x6, #4
+        ADD x10, x5, x10
+        STR x8, [x10]
+        STR x9, [x10, #8]
+        
+        ADD x6, x6, #1
+        B f08copiar_coords
         
 f08terminar:
-        // Guardar cantidad de celdas (COMENTADO)
-        // LDR x0, =UltimoAtaqueCantidad
-        // STR x21, [x0]
+        // Guardar cantidad de celdas en variable global
+        LDR x0, =UltimoAtaqueCantidad
+        STR x21, [x0]
         
         // Retornar cantidad de impactos
         MOV x0, x19
@@ -757,7 +776,7 @@ f08terminar:
         LDP x21, x22, [sp, #32]
         LDR x23, [sp, #48]
         
-        ldp x29, x30, [sp], 80
+        ldp x29, x30, [sp], 160
         RET
 
 
@@ -936,14 +955,14 @@ f12validar_sur:
         RET
 
 f12validar_este:
-        CMP x1, #0
+        CMP x1, #13             // Columna 13 (borde derecho del tablero 10x14)
         BNE f12invalido
         MOV x0, #1
         ldp x29, x30, [sp], 16
         RET
 
 f12validar_oeste:
-        CMP x1, #13
+        CMP x1, #0              // Columna 0 (borde izquierdo)
         BNE f12invalido
         MOV x0, #1
         ldp x29, x30, [sp], 16

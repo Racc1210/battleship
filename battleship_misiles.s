@@ -198,13 +198,13 @@ f02solicitar_opcion:
         
         // Verificar munición disponible
         SUB x1, x0, #1          // Convertir a índice (0-4)
-        STR x0, [sp, #8]        // Guardar opción original
+        STR x0, [sp, #16]       // Guardar opción original (NO en #8 porque sobrescribe x30!)
         BL f14VerificarMunicionDisponible
         CMP x0, #0
         BEQ f02sin_municion
         
         // Ejecutar acción según opción
-        LDR x1, [sp, #8]        // Recuperar opción
+        LDR x1, [sp, #16]       // Recuperar opción
         SUB x1, x1, #1          // Convertir a índice
         CMP x1, #0
         BEQ f02lanzar_estandar

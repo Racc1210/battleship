@@ -407,10 +407,20 @@ LargoErrorOrigenTorpedoVal: .quad 99
 // ============================================
 .global MensajeCoordenadaAtaque, LargoMensajeCoordenadaAtaqueVal
 .global MensajeOpcionMisil, LargoMensajeOpcionMisilVal
+.global MensajeFilaAtaque, LargoMensajeFilaAtaqueVal
+.global MensajeColumnaAtaque, LargoMensajeColumnaAtaqueVal
 
 MensajeCoordenadaAtaque:
     .asciz "\n  Ingrese coordenada de ataque (ej: D7): "
 LargoMensajeCoordenadaAtaqueVal: .quad 42
+
+MensajeFilaAtaque:
+    .asciz "\n  Ingrese fila (A-J): "
+LargoMensajeFilaAtaqueVal: .quad 22
+
+MensajeColumnaAtaque:
+    .asciz "\n  Ingrese columna (1-14): "
+LargoMensajeColumnaAtaqueVal: .quad 26
 
 MensajeOpcionMisil:
     .asciz "\n  Opcion: "
@@ -468,12 +478,12 @@ MensajeAgua:
 LargoMensajeAguaVal: .quad 26
 
 MensajeImpacto:
-    .asciz "\n IMPACTO! Has golpeado un barco enemigo\n"
-LargoMensajeImpactoVal: .quad 41
+    .asciz "\n\033[33m IMPACTO!\033[0m Has golpeado un barco enemigo\n"
+LargoMensajeImpactoVal: .quad 55
 
 MensajeHundido:
-    .asciz "\n BARCO HUNDIDO! Has destruido una embarcacion enemiga\n"
-LargoMensajeHundidoVal: .quad 55
+    .asciz "\n\033[32m BARCO HUNDIDO!\033[0m Has destruido una embarcacion enemiga\n"
+LargoMensajeHundidoVal: .quad 69
 
 MensajeDisparoRepetido:
     .asciz "\n Ya has disparado a esta coordenada anteriormente\n"
@@ -505,12 +515,12 @@ MensajeEnemigoDispara:
 LargoMensajeEnemigoDisparaVal: .quad 31
 
 MensajeEnemigoImpacto:
-    .asciz "\n El enemigo ha impactado uno de tus barcos en "
-LargoMensajeEnemigoImpactoVal: .quad 47
+    .asciz "\n\033[31m El enemigo ha impactado\033[0m uno de tus barcos en "
+LargoMensajeEnemigoImpactoVal: .quad 61
 
 MensajeEnemigoHundio:
-    .asciz "\n El enemigo ha hundido uno de tus barcos!\n"
-LargoMensajeEnemigoHundioVal: .quad 43
+    .asciz "\n\033[31m El enemigo ha hundido uno de tus barcos!\033[0m\n"
+LargoMensajeEnemigoHundioVal: .quad 57
 
 // ============================================
 // MENSAJES DE FIN DE JUEGO
@@ -519,12 +529,12 @@ LargoMensajeEnemigoHundioVal: .quad 43
 .global MensajeDerrota, LargoMensajeDerrotaVal
 
 MensajeVictoria:
-    .asciz "\n========================================\n                                        \n           VICTORIA!                    \n                                        \n  Has hundido toda la flota enemiga     \n                                        \n========================================\n\n"
-LargoMensajeVictoriaVal: .quad 289
+    .asciz "\n========================================\n                                        \n\033[32m           VICTORIA!\033[0m                    \n                                        \n  Has hundido toda la flota enemiga     \n                                        \n========================================\n\n"
+LargoMensajeVictoriaVal: .quad 303
 
 MensajeDerrota:
-    .asciz "\n========================================\n                                        \n             DERROTA                    \n                                        \n   Toda tu flota ha sido destruida      \n                                        \n========================================\n\n"
-LargoMensajeDerrotaVal: .quad 289
+    .asciz "\n========================================\n                                        \n\033[31m             DERROTA\033[0m                    \n                                        \n   Toda tu flota ha sido destruida      \n                                        \n========================================\n\n"
+LargoMensajeDerrotaVal: .quad 303
 
 // ============================================
 // MENSAJES DE SALIDA

@@ -42,6 +42,9 @@
 .extern TableroDisparosComputadora, TableroDisparosJugador
 .extern BarcosJugador, BarcosComputadora
 .extern MunicionComputadora
+.extern PatronExocet1, PatronExocet2
+.extern PatronApache1, PatronApache2
+.extern PatronTomahawk
 .extern ESTADO_VACIA, ESTADO_BARCO, ESTADO_DESCONOCIDA
 .extern ESTADO_ENEMIGO_AGUA, ESTADO_ENEMIGO_BARCO
 .extern ORIENTACION_HORIZONTAL, ORIENTACION_VERTICAL
@@ -130,12 +133,18 @@ f02TurnoIA:
         LDR x2, [x2]
         BL f01ImprimirCadena
         
-        // Seleccionar coordenada según estrategia
+        // Decidir qué tipo de misil usar (estratégico)
+        BL f10SeleccionarMisilIA
+        STR x0, [sp, #40]       // Tipo de misil (0=estándar, 1=Exocet, 2=Tomahawk, 3=Apache)
+        
+        CMP x0, #0
+        BNE f02ataque_especial
+        
+        // Ataque estándar
         BL f03SeleccionarCoordenadaIA
         STR x0, [sp, #16]       // Fila
         STR x1, [sp, #24]       // Columna
         
-        // Realizar ataque
         LDR x0, =TableroJugador
         LDR x1, =TableroDisparosComputadora
         LDR x2, =BarcosJugador
@@ -143,9 +152,16 @@ f02TurnoIA:
         LDR x4, [sp, #24]       // Columna
         MOV x5, #0              // Es IA
         BL f01ProcesarDisparoEnCelda
-        
+        B f02procesar_resultado
+
+f02ataque_especial:
+        // Usar misil especial de la IA
+        LDR x0, [sp, #40]
+        BL f11LanzarMisilEspecialIA
+        MOV x0, #1              // Resultado genérico para especiales
+
+f02procesar_resultado:
         STR x0, [sp, #32]       // Guardar resultado
-        STR x1, [sp, #40]       // Guardar índice barco
         
         // Actualizar estrategia según resultado
         CMP x0, #0
@@ -836,6 +852,250 @@ f09siguiente_barco:
 
 f09fin_colocacion:
         ldp x29, x30, [sp], 80
+        RET
+
+
+// ******  Nombre  ***********************************
+// f10SeleccionarMisilIA
+// ******  Descripción  ******************************
+// Decide estratégicamente qué tipo de misil usar.
+// Usa misiles especiales cuando hay munición y
+// la situación es favorable.
+// ******  Retorno  **********************************
+// x0: Tipo de misil (0=estándar, 1=Exocet, 2=Tomahawk, 3=Apache)
+// ******  Entradas  *********************************
+// Ninguna
+// ******  Errores  **********************************
+// Ninguno
+// ***************************************************
+f10SeleccionarMisilIA:
+        stp x29, x30, [sp, -32]!
+        mov x29, sp
+        
+        // Generar número aleatorio para decidir (20% usar especial)
+        MOV x0, #100
+        BL f02NumeroAleatorio
+        STR x0, [sp, #16]
+        
+        CMP x0, #80             // 80% usar estándar
+        BGE f10usar_estandar
+        
+        // Verificar munición de Tomahawk (más potente)
+        LDR x0, =MunicionComputadora
+        LDR x1, [x0, #8]        // Tomahawk
+        CMP x1, #0
+        BGT f10usar_tomahawk
+        
+        // Verificar Apache
+        LDR x1, [x0, #16]
+        CMP x1, #0
+        BGT f10usar_apache
+        
+        // Verificar Exocet
+        LDR x1, [x0]
+        CMP x1, #0
+        BGT f10usar_exocet
+        
+f10usar_estandar:
+        MOV x0, #0
+        ldp x29, x30, [sp], 32
+        RET
+
+f10usar_exocet:
+        MOV x0, #1
+        ldp x29, x30, [sp], 32
+        RET
+
+f10usar_tomahawk:
+        MOV x0, #2
+        ldp x29, x30, [sp], 32
+        RET
+
+f10usar_apache:
+        MOV x0, #3
+        ldp x29, x30, [sp], 32
+        RET
+
+
+// ******  Nombre  ***********************************
+// f11LanzarMisilEspecialIA
+// ******  Descripción  ******************************
+// Ejecuta un ataque con misil especial de la IA.
+// ******  Retorno  **********************************
+// x0: Resultado del ataque
+// ******  Entradas  *********************************
+// x0: Tipo de misil (1=Exocet, 2=Tomahawk, 3=Apache)
+// ******  Errores  **********************************
+// Ninguno
+// ***************************************************
+f11LanzarMisilEspecialIA:
+        stp x29, x30, [sp, -48]!
+        mov x29, sp
+        
+        STR x0, [sp, #16]       // Tipo de misil
+        
+        // Generar coordenada aleatoria
+        BL f04EstrategiaBusqueda
+        STR x0, [sp, #24]       // Fila
+        STR x1, [sp, #32]       // Columna
+        
+        LDR x0, [sp, #16]
+        CMP x0, #1
+        BEQ f11usar_exocet_ia
+        CMP x0, #2
+        BEQ f11usar_tomahawk_ia
+        CMP x0, #3
+        BEQ f11usar_apache_ia
+        B f11fin_especial
+
+f11usar_exocet_ia:
+        // Seleccionar patrón aleatorio (0 o 1)
+        MOV x0, #2
+        BL f02NumeroAleatorio
+        CMP x0, #0
+        BEQ f11exocet_patron1
+        LDR x0, =PatronExocet2
+        B f11aplicar_patron_ia
+
+f11exocet_patron1:
+        LDR x0, =PatronExocet1
+        B f11aplicar_patron_ia
+
+f11usar_tomahawk_ia:
+        LDR x0, =PatronTomahawk
+        B f11aplicar_patron_ia
+
+f11usar_apache_ia:
+        MOV x0, #2
+        BL f02NumeroAleatorio
+        CMP x0, #0
+        BEQ f11apache_patron1
+        LDR x0, =PatronApache2
+        B f11aplicar_patron_ia
+
+f11apache_patron1:
+        LDR x0, =PatronApache1
+
+f11aplicar_patron_ia:
+        // x0 ya tiene el patrón
+        LDR x1, [sp, #24]       // Fila
+        LDR x2, [sp, #32]       // Columna
+        STR x0, [sp, #40]       // Guardar patrón
+        
+        // Aplicar patrón (versión simplificada para IA)
+        BL f12AplicarPatronIA
+        
+        // Decrementar munición
+        LDR x0, [sp, #16]
+        SUB x0, x0, #1          // Convertir tipo a índice munición
+        BL f13DecrementarMunicionIA
+
+f11fin_especial:
+        MOV x0, #1              // Retornar resultado genérico
+        ldp x29, x30, [sp], 48
+        RET
+
+
+// ******  Nombre  ***********************************
+// f12AplicarPatronIA
+// ******  Descripción  ******************************
+// Aplica un patrón de ataque de la IA.
+// ******  Retorno  **********************************
+// Ninguno
+// ******  Entradas  *********************************
+// x0: Dirección del patrón
+// x1: Fila central
+// x2: Columna central
+// ******  Errores  **********************************
+// Ninguno
+// ***************************************************
+f12AplicarPatronIA:
+        stp x29, x30, [sp, -64]!
+        mov x29, sp
+        
+        STR x0, [sp, #16]       // Patrón
+        STR x1, [sp, #24]       // Fila central
+        STR x2, [sp, #32]       // Columna central
+        MOV x20, x0             // Puntero al patrón
+
+f12loop_patron_ia:
+        LDRSB w22, [x20]
+        LDRSB w23, [x20, #1]
+        
+        // Verificar terminador
+        CMP w22, #-1
+        BNE f12procesar_celda_ia
+        CMP w23, #-1
+        BNE f12procesar_celda_ia
+        LDR x5, [sp, #16]
+        CMP x20, x5
+        BEQ f12procesar_celda_ia
+        B f12fin_patron_ia
+
+f12procesar_celda_ia:
+        LDR x1, [sp, #24]       // Fila central
+        LDR x2, [sp, #32]       // Columna central
+        SXTW x3, w22
+        SXTW x4, w23
+        ADD x1, x1, x3
+        ADD x2, x2, x4
+        
+        // Validar coordenada
+        CMP x1, #0
+        BLT f12siguiente_offset_ia
+        CMP x1, #9
+        BGT f12siguiente_offset_ia
+        CMP x2, #0
+        BLT f12siguiente_offset_ia
+        CMP x2, #13
+        BGT f12siguiente_offset_ia
+        
+        // Procesar disparo
+        LDR x0, =TableroJugador
+        STR x1, [sp, #40]
+        STR x2, [sp, #48]
+        MOV x3, x1
+        MOV x4, x2
+        LDR x1, =TableroDisparosComputadora
+        LDR x2, =BarcosJugador
+        MOV x5, #0              // Es IA
+        BL f01ProcesarDisparoEnCelda
+
+f12siguiente_offset_ia:
+        ADD x20, x20, #2
+        B f12loop_patron_ia
+
+f12fin_patron_ia:
+        ldp x29, x30, [sp], 64
+        RET
+
+
+// ******  Nombre  ***********************************
+// f13DecrementarMunicionIA
+// ******  Descripción  ******************************
+// Decrementa la munición de la IA.
+// ******  Retorno  **********************************
+// Ninguno
+// ******  Entradas  *********************************
+// x0: Índice del tipo de misil
+// ******  Errores  **********************************
+// Ninguno
+// ***************************************************
+f13DecrementarMunicionIA:
+        stp x29, x30, [sp, -16]!
+        mov x29, sp
+        
+        LDR x1, =MunicionComputadora
+        LSL x2, x0, #3
+        ADD x1, x1, x2
+        LDR x3, [x1]
+        CMP x3, #0
+        BLE f13fin_dec
+        SUB x3, x3, #1
+        STR x3, [x1]
+
+f13fin_dec:
+        ldp x29, x30, [sp], 16
         RET
 
 

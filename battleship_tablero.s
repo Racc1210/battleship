@@ -407,35 +407,35 @@ f02ImprimirTableroPropio:
         BL f01ImprimirCadena
         
         LDR x1, =Num10
-        MOV x2, #3
+        MOV x2, #4
         BL f01ImprimirCadena
         LDR x1, =Espacio
         MOV x2, #1
         BL f01ImprimirCadena
         
         LDR x1, =Num11
-        MOV x2, #3
+        MOV x2, #4
         BL f01ImprimirCadena
         LDR x1, =Espacio
         MOV x2, #1
         BL f01ImprimirCadena
         
         LDR x1, =Num12
-        MOV x2, #3
+        MOV x2, #4
         BL f01ImprimirCadena
         LDR x1, =Espacio
         MOV x2, #1
         BL f01ImprimirCadena
         
         LDR x1, =Num13
-        MOV x2, #3
+        MOV x2, #4
         BL f01ImprimirCadena
         LDR x1, =Espacio
         MOV x2, #1
         BL f01ImprimirCadena
         
         LDR x1, =Num14
-        MOV x2, #3
+        MOV x2, #4
         BL f01ImprimirCadena
         
         LDR x1, =SaltoLinea
@@ -593,42 +593,42 @@ f03ImprimirTableroEnemigo:
         BL f01ImprimirCadena
         
         LDR x1, =Num1
-        MOV x2, #2
+        MOV x2, #1
         BL f01ImprimirCadena
         LDR x1, =Espacio
         MOV x2, #1
         BL f01ImprimirCadena
         
         LDR x1, =Num2
-        MOV x2, #2
+        MOV x2, #3
         BL f01ImprimirCadena
         LDR x1, =Espacio
         MOV x2, #1
         BL f01ImprimirCadena
         
         LDR x1, =Num3
-        MOV x2, #2
+        MOV x2, #3
         BL f01ImprimirCadena
         LDR x1, =Espacio
         MOV x2, #1
         BL f01ImprimirCadena
         
         LDR x1, =Num4
-        MOV x2, #2
+        MOV x2, #3
         BL f01ImprimirCadena
         LDR x1, =Espacio
         MOV x2, #1
         BL f01ImprimirCadena
         
         LDR x1, =Num5
-        MOV x2, #2
+        MOV x2, #3
         BL f01ImprimirCadena
         LDR x1, =Espacio
         MOV x2, #1
         BL f01ImprimirCadena
         
         LDR x1, =Num6
-        MOV x2, #2
+        MOV x2, #3
         BL f01ImprimirCadena
         LDR x1, =Espacio
         MOV x2, #1
@@ -638,53 +638,53 @@ f03ImprimirTableroEnemigo:
         MOV x2, #2
         BL f01ImprimirCadena
         LDR x1, =Espacio
-        MOV x2, #1
+        MOV x2, #3
         BL f01ImprimirCadena
         
         LDR x1, =Num8
-        MOV x2, #2
+        MOV x2, #3
         BL f01ImprimirCadena
         LDR x1, =Espacio
         MOV x2, #1
         BL f01ImprimirCadena
         
         LDR x1, =Num9
-        MOV x2, #2
+        MOV x2, #3
         BL f01ImprimirCadena
         LDR x1, =Espacio
         MOV x2, #1
         BL f01ImprimirCadena
         
         LDR x1, =Num10
-        MOV x2, #2
+        MOV x2, #4
         BL f01ImprimirCadena
         LDR x1, =Espacio
         MOV x2, #1
         BL f01ImprimirCadena
         
         LDR x1, =Num11
-        MOV x2, #2
+        MOV x2, #4
         BL f01ImprimirCadena
         LDR x1, =Espacio
         MOV x2, #1
         BL f01ImprimirCadena
         
         LDR x1, =Num12
-        MOV x2, #2
+        MOV x2, #4
         BL f01ImprimirCadena
         LDR x1, =Espacio
         MOV x2, #1
         BL f01ImprimirCadena
         
         LDR x1, =Num13
-        MOV x2, #2
+        MOV x2, #4
         BL f01ImprimirCadena
         LDR x1, =Espacio
         MOV x2, #1
         BL f01ImprimirCadena
         
         LDR x1, =Num14
-        MOV x2, #2
+        MOV x2, #4
         BL f01ImprimirCadena
         
         LDR x1, =SaltoLinea

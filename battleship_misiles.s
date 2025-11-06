@@ -365,24 +365,27 @@ f03resultado_agua:
         LDR x2, =LargoMensajeAguaVal
         LDR x2, [x2]
         BL f01ImprimirCadena
-        B f03fin
+        // Cargar resultado directamente aquí
+        MOV x0, #0
+        ldp x29, x30, [sp], 64
+        RET
 
 f03resultado_impacto:
         LDR x1, =MensajeImpacto
         LDR x2, =LargoMensajeImpactoVal
         LDR x2, [x2]
         BL f01ImprimirCadena
-        B f03fin
+        MOV x0, #1
+        ldp x29, x30, [sp], 64
+        RET
 
 f03resultado_hundido:
         LDR x1, =MensajeHundido
         LDR x2, =LargoMensajeHundidoVal
         LDR x2, [x2]
         BL f01ImprimirCadena
-
-f03fin:
-        LDR x0, [sp, #32]       // Leer resultado ANTES de restaurar el stack
-        ldp x29, x30, [sp], 64  // Ahora sí restaurar el stack
+        MOV x0, #2
+        ldp x29, x30, [sp], 64
         RET
 
 

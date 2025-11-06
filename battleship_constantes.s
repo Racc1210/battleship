@@ -177,7 +177,7 @@ ColorAmarillo: .asciz "\033[33m"
 
 MensajeBienvenida:
     .asciz "\n╔════════════════════════════════════════════════════════════╗\n║                                                            ║\n║            BATTLESHIP: ADVANCED MISSION                    ║\n║                                                            ║\n║              Versión ARM64 Assembly                        ║\n║                                                            ║\n╚════════════════════════════════════════════════════════════╝\n\n"
-LargoMensajeBienvenidaVal: .quad 443
+LargoMensajeBienvenidaVal: .quad 452
 
 // ============================================
 // MENSAJE DE CRÉDITOS

@@ -582,20 +582,59 @@ f11cero:
 // Retorna (-1, -1) si el formato es inválido
 // ***************************************************
 f12LeerCoordenada:
-        stp x29, x30, [sp, -16]!
+        stp x29, x30, [sp, -32]!
         mov x29, sp
         
         // Leer desde entrada estándar
         LDR x1, =BufferCoordenada
-        MOV x2, #6              // Máximo: "J14\n\0"
+        MOV x2, #8              // Máximo: "J14\n"
         BL f02LeerCadena
+        
+        // x0 contiene bytes leídos
+        STR x0, [sp, #16]       // Guardar cantidad de bytes
+        
+        // Verificar que se leyó algo
+        CMP x0, #2              // Mínimo "A1"
+        BLT f12error
+        
+        // Buscar y eliminar el salto de línea
+        LDR x1, =BufferCoordenada
+        MOV x2, #0              // Contador
+        
+f12buscar_fin:
+        CMP x2, x0              // ¿Llegamos al final?
+        BGE f12parsear
+        LDRB w3, [x1, x2]       // Cargar byte
+        CMP w3, #10             // ¿Es \n?
+        BEQ f12encontrado_salto
+        CMP w3, #0              // ¿Es \0?
+        BEQ f12parsear
+        ADD x2, x2, #1
+        B f12buscar_fin
+
+f12encontrado_salto:
+        // Reemplazar \n con \0
+        MOV w3, #0
+        STRB w3, [x1, x2]
+
+f12parsear:
+        // x2 tiene la longitud sin \n
+        CMP x2, #2              // Mínimo "A1"
+        BLT f12error
+        CMP x2, #3              // Máximo "J14"
+        BGT f12error
         
         // Parsear coordenada
         LDR x1, =BufferCoordenada
-        MOV x2, #5
         BL f10ParsearCoordenada
         
-        ldp x29, x30, [sp], 16
+        ldp x29, x30, [sp], 32
+        RET
+
+f12error:
+        MOV x0, #-1
+        MOV x1, #-1
+        ldp x29, x30, [sp], 32
         RET
 
 

@@ -316,22 +316,6 @@ f14no_disponible:
 // Reintenta si coordenada inválida
 // ***************************************************
 f03LanzarMisilEstandar:
-        stp x29, x30, [sp, -16]!
-        mov x29, sp
-        
-        // Simplemente mostrar mensaje y retornar
-        LDR x1, =MensajeAgua
-        LDR x2, =LargoMensajeAguaVal
-        LDR x2, [x2]
-        BL f01ImprimirCadena
-        
-        MOV x0, #0              // Siempre retorna AGUA
-        ldp x29, x30, [sp], 16
-        RET
-
-// VERSION COMPLETA COMENTADA TEMPORALMENTE
-/*
-f03LanzarMisilEstandar_ORIGINAL:
         stp x29, x30, [sp, -80]!
         mov x29, sp
         
@@ -365,11 +349,6 @@ f03solicitar_coord:
         
         // x0 tiene el resultado - guardarlo
         STR x0, [sp, #32]       // Resultado
-        
-        // TODO: Registrar último ataque para highlighting
-        // LDR x0, [sp, #16]       // Fila
-        // LDR x1, [sp, #24]       // Columna
-        // BL f09RegistrarUltimoAtaque
         
         // Recuperar resultado
         LDR x0, [sp, #32]
@@ -408,9 +387,6 @@ f03resultado_hundido:
         MOV x0, #2
         ldp x29, x30, [sp], 80
         RET
-*/
-
-// FIN VERSION COMENTADA
 
 
 // ******  Nombre  ***********************************

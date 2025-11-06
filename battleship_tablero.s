@@ -72,9 +72,8 @@ UltimoAtaqueColumna:     .skip 8     // Columna del último ataque individual
 UltimoAtaqueCantidad:    .skip 8     // Cantidad de celdas en último ataque
 UltimoAtaqueCeldas:      .skip 360   // Max 45 pares de coordenadas (fila,columna) × 8 bytes
 
-// Códigos de color ANSI
+// Códigos de color ANSI (locales a este archivo)
 .section .data
-.global ColorAmarillo, ColorReset
 ColorAmarillo:  .asciz "\033[33m"   // Amarillo para última celda atacada
 ColorReset:     .asciz "\033[0m"    // Reset color
 

@@ -41,9 +41,9 @@
 .extern f05ValidarCoordenada
 .extern f01ProcesarDisparoEnCelda
 .extern f11ImprimirNumero
-// .extern f09RegistrarUltimoAtaque
-// .extern f12LimpiarUltimoAtaque
-// .extern UltimoAtaqueCeldas, UltimoAtaqueCantidad
+.extern f09RegistrarUltimoAtaque
+.extern f12LimpiarUltimoAtaque
+.extern UltimoAtaqueCeldas, UltimoAtaqueCantidad
 .extern MunicionJugador, MunicionComputadora
 .extern TableroComputadora, TableroJugador
 .extern TableroDisparosJugador, TableroDisparosComputadora
@@ -349,6 +349,11 @@ f03solicitar_coord:
         
         // x0 tiene el resultado - guardarlo
         STR x0, [sp, #32]       // Resultado
+        
+        // Registrar último ataque para highlighting
+        LDR x0, [sp, #16]       // Fila
+        LDR x1, [sp, #24]       // Columna
+        BL f09RegistrarUltimoAtaque
         
         // Recuperar resultado
         LDR x0, [sp, #32]

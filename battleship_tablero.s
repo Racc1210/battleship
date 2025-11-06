@@ -751,88 +751,88 @@ f03loop_columnas:
         B f03imprimir_desconocida
         
 f03imprimir_desconocida:
-        // TODO: Verificar si es parte del último ataque (COMENTADO)
-        // LDR x0, [sp, #16]       // fila
-        // LDR x1, [sp, #32]       // columna
-        // BL f11EsCeldaUltimoAtaque
-        // CMP x0, #1
-        // BNE f03desc_sin_color
-        // 
-        // // Imprimir con color amarillo
-        // LDR x1, =ColorAmarillo
-        // MOV x2, #5              // Longitud "\033[33m"
-        // BL f01ImprimirCadena
+        // Verificar si es parte del último ataque
+        LDR x0, [sp, #16]       // fila
+        LDR x1, [sp, #32]       // columna
+        BL f11EsCeldaUltimoAtaque
+        CMP x0, #1
+        BNE f03desc_sin_color
+        
+        // Imprimir con color amarillo
+        LDR x1, =ColorAmarillo
+        MOV x2, #5              // Longitud "\033[33m"
+        BL f01ImprimirCadena
         
 f03desc_sin_color:
         LDR x1, =SimboloDesconocida
         MOV x2, #1
         BL f01ImprimirCadena
         
-        // Reset color si fue coloreado (COMENTADO)
-        // LDR x0, [sp, #16]
-        // LDR x1, [sp, #32]
-        // BL f11EsCeldaUltimoAtaque
-        // CMP x0, #1
-        // BNE f03siguiente_columna
-        // LDR x1, =ColorReset
-        // MOV x2, #4
-        // BL f01ImprimirCadena
+        // Reset color si fue coloreado
+        LDR x0, [sp, #16]
+        LDR x1, [sp, #32]
+        BL f11EsCeldaUltimoAtaque
+        CMP x0, #1
+        BNE f03siguiente_columna
+        LDR x1, =ColorReset
+        MOV x2, #4
+        BL f01ImprimirCadena
         
         B f03siguiente_columna
         
 f03imprimir_enemigo_agua:
-        // TODO: Verificar si es parte del último ataque (COMENTADO)
-        // LDR x0, [sp, #16]
-        // LDR x1, [sp, #32]
-        // BL f11EsCeldaUltimoAtaque
-        // CMP x0, #1
-        // BNE f03agua_sin_color
-        // 
-        // LDR x1, =ColorAmarillo
-        // MOV x2, #5
-        // BL f01ImprimirCadena
+        // Verificar si es parte del último ataque
+        LDR x0, [sp, #16]
+        LDR x1, [sp, #32]
+        BL f11EsCeldaUltimoAtaque
+        CMP x0, #1
+        BNE f03agua_sin_color
+        
+        LDR x1, =ColorAmarillo
+        MOV x2, #5
+        BL f01ImprimirCadena
         
 f03agua_sin_color:
         LDR x1, =SimboloEnemigoAgua
         MOV x2, #1
         BL f01ImprimirCadena
         
-        // LDR x0, [sp, #16]
-        // LDR x1, [sp, #32]
-        // BL f11EsCeldaUltimoAtaque
-        // CMP x0, #1
-        // BNE f03siguiente_columna
-        // LDR x1, =ColorReset
-        // MOV x2, #4
-        // BL f01ImprimirCadena
+        LDR x0, [sp, #16]
+        LDR x1, [sp, #32]
+        BL f11EsCeldaUltimoAtaque
+        CMP x0, #1
+        BNE f03siguiente_columna
+        LDR x1, =ColorReset
+        MOV x2, #4
+        BL f01ImprimirCadena
         
         B f03siguiente_columna
         
 f03imprimir_enemigo_barco:
-        // TODO: Verificar si es parte del último ataque (COMENTADO)
-        // LDR x0, [sp, #16]
-        // LDR x1, [sp, #32]
-        // BL f11EsCeldaUltimoAtaque
-        // CMP x0, #1
-        // BNE f03barco_sin_color
-        // 
-        // LDR x1, =ColorAmarillo
-        // MOV x2, #5
-        // BL f01ImprimirCadena
+        // Verificar si es parte del último ataque
+        LDR x0, [sp, #16]
+        LDR x1, [sp, #32]
+        BL f11EsCeldaUltimoAtaque
+        CMP x0, #1
+        BNE f03barco_sin_color
+        
+        LDR x1, =ColorAmarillo
+        MOV x2, #5
+        BL f01ImprimirCadena
         
 f03barco_sin_color:
         LDR x1, =SimboloEnemigoBarco
         MOV x2, #1
         BL f01ImprimirCadena
         
-        // LDR x0, [sp, #16]
-        // LDR x1, [sp, #32]
-        // BL f11EsCeldaUltimoAtaque
-        // CMP x0, #1
-        // BNE f03siguiente_columna
-        // LDR x1, =ColorReset
-        // MOV x2, #4
-        // BL f01ImprimirCadena
+        LDR x0, [sp, #16]
+        LDR x1, [sp, #32]
+        BL f11EsCeldaUltimoAtaque
+        CMP x0, #1
+        BNE f03siguiente_columna
+        LDR x1, =ColorReset
+        MOV x2, #4
+        BL f01ImprimirCadena
         
 f03siguiente_columna:
         // Espacio entre celdas (3 espacios)

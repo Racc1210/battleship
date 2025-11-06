@@ -657,7 +657,7 @@ f07fin_torpedo:
 // Ninguno (salta celdas fuera del tablero)
 // ***************************************************
 f08AplicarPatron:
-        stp x29, x30, [sp, -160]!    // Aumentar a 160 para tener espacio para buffer
+        stp x29, x30, [sp, -240]!    // 240 bytes: 80 para vars + 160 para buffer (10 celdas × 16)
         mov x29, sp
         
         // Guardar registros callee-saved
@@ -784,7 +784,7 @@ f08terminar:
         LDP x21, x22, [sp, #32]
         LDR x23, [sp, #48]
         
-        ldp x29, x30, [sp], 160
+        ldp x29, x30, [sp], 240
         RET
 
 

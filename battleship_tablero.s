@@ -530,9 +530,10 @@ f02imprimir_barco_impactado:
         BL f01ImprimirCadena
         
 f02siguiente_columna:
-        // Espacio entre celdas
+        // Espacio entre celdas (3 espacios)
         LDR x1, =Espacio
         MOV x2, #1
+        BL f01ImprimirCadena
         BL f01ImprimirCadena
         BL f01ImprimirCadena
         
@@ -832,9 +833,10 @@ f03barco_sin_color:
         BL f01ImprimirCadena
         
 f03siguiente_columna:
-        // Espacio entre celdas
+        // Espacio entre celdas (3 espacios)
         LDR x1, =Espacio
         MOV x2, #1
+        BL f01ImprimirCadena
         BL f01ImprimirCadena
         BL f01ImprimirCadena
         

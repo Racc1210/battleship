@@ -642,12 +642,17 @@ f07fin_torpedo:
 // Ninguno (salta celdas fuera del tablero)
 // ***************************************************
 f08AplicarPatron:
-        stp x29, x30, [sp, -80]!
+        stp x29, x30, [sp, -96]!
         mov x29, sp
         
-        STR x0, [sp, #16]       // Patrón
-        STR x1, [sp, #24]       // Fila central
-        STR x2, [sp, #32]       // Columna central
+        // Guardar registros callee-saved
+        STP x19, x20, [sp, #16]
+        STP x21, x22, [sp, #32]
+        STR x23, [sp, #48]
+        
+        STR x0, [sp, #56]       // Patrón
+        STR x1, [sp, #64]       // Fila central
+        STR x2, [sp, #72]       // Columna central
         MOV x19, #0             // Contador impactos
         MOV x20, x0             // Puntero al patrón
         MOV x21, #0             // Contador de celdas atacadas
@@ -668,8 +673,8 @@ f08loop_patron:
         
 f08procesar_celda:
         // Calcular coordenada objetivo
-        LDR x1, [sp, #24]       // Fila central
-        LDR x2, [sp, #32]       // Columna central
+        LDR x1, [sp, #64]       // Fila central
+        LDR x2, [sp, #72]       // Columna central
         SXTW x3, w22            // Extender signo de offset fila a 64 bits
         SXTW x4, w23            // Extender signo de offset columna a 64 bits
         ADD x1, x1, x3          // Fila objetivo
@@ -693,10 +698,9 @@ f08procesar_celda:
         STR x2, [x5, #8]        // Guardar columna
         ADD x21, x21, #1        // Incrementar contador de celdas
         
-        // Procesar disparo
-        STR x19, [sp, #48]
-        STR x20, [sp, #40]
-        STR x21, [sp, #56]
+        // Procesar disparo (guardar x1, x2 que tienen fila/columna objetivo)
+        STR x1, [sp, #80]       // Fila objetivo
+        STR x2, [sp, #88]       // Columna objetivo
         
         LDR x0, =TableroComputadora
         MOV x3, x1
@@ -706,9 +710,8 @@ f08procesar_celda:
         MOV x5, #1
         BL f01ProcesarDisparoEnCelda
         
-        LDR x19, [sp, #48]
-        LDR x20, [sp, #40]
-        LDR x21, [sp, #56]
+        // x19, x20, x21 se preservan automáticamente (callee-saved)
+        // No necesitamos recuperarlos
         
         // Incrementar contador si fue impacto
         CMP x0, #0
@@ -724,9 +727,15 @@ f08fin_patron:
         LDR x0, =UltimoAtaqueCantidad
         STR x21, [x0]
         
-        // Fin del patrón
-        MOV x0, x19             // Retornar cantidad de impactos
-        ldp x29, x30, [sp], 80
+        // Retornar cantidad de impactos
+        MOV x0, x19
+        
+        // Restaurar registros callee-saved
+        LDP x19, x20, [sp, #16]
+        LDP x21, x22, [sp, #32]
+        LDR x23, [sp, #48]
+        
+        ldp x29, x30, [sp], 96
         RET
 
 

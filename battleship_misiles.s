@@ -310,7 +310,7 @@ f14no_disponible:
 // Reintenta si coordenada inválida
 // ***************************************************
 f03LanzarMisilEstandar:
-        stp x29, x30, [sp, -48]!
+        stp x29, x30, [sp, -64]!
         mov x29, sp
         
 f03solicitar_coord:
@@ -381,8 +381,8 @@ f03resultado_hundido:
         BL f01ImprimirCadena
 
 f03fin:
-        LDR x0, [sp, #32]
-        ldp x29, x30, [sp], 48
+        LDR x0, [sp, #32]       // Leer resultado ANTES de restaurar el stack
+        ldp x29, x30, [sp], 64  // Ahora sí restaurar el stack
         RET
 
 

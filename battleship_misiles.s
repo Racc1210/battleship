@@ -44,7 +44,7 @@
 .extern f11ImprimirNumero
 .extern f09RegistrarUltimoAtaque
 .extern f12LimpiarUltimoAtaque
-.extern BufferEntrada
+.extern BufferLectura
 .extern UltimoAtaqueCeldas, UltimoAtaqueCantidad
 .extern MunicionJugador, MunicionComputadora
 .extern TableroComputadora, TableroJugador
@@ -592,7 +592,7 @@ f07solicitar_fila_este_oeste:
         BL f02LeerCadena          // Lee una cadena
         
         // Convertir letra a índice (A=0, J=9)
-        LDR x1, =BufferEntrada
+        LDR x1, =BufferLectura
         LDRB w0, [x1]             // Primer carácter
         
         // Convertir a mayúscula si es necesario

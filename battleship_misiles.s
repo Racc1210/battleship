@@ -316,40 +316,7 @@ f14no_disponible:
 // Reintenta si coordenada inválida
 // ***************************************************
 f03LanzarMisilEstandar:
-        // DEBUG: Imprimir x29 y x30 ANTES de guardarlos
-        // Guardar x0-x2 temporalmente
-        stp x0, x1, [sp, -32]!
-        str x2, [sp, #16]
-        
-        LDR x1, =DebugMsgEntry1
-        LDR x2, =LargoDebugMsgEntry1Val
-        LDR x2, [x2]
-        BL f01ImprimirCadena
-        
-        MOV x0, x29
-        BL f11ImprimirNumero
-        
-        LDR x1, =SaltoLinea
-        MOV x2, #1
-        BL f01ImprimirCadena
-        
-        LDR x1, =DebugMsgEntry2
-        LDR x2, =LargoDebugMsgEntry2Val
-        LDR x2, [x2]
-        BL f01ImprimirCadena
-        
-        MOV x0, x30
-        BL f11ImprimirNumero
-        
-        LDR x1, =SaltoLinea
-        MOV x2, #1
-        BL f01ImprimirCadena
-        
-        // Restaurar x0-x2
-        ldr x2, [sp, #16]
-        ldp x0, x1, [sp], 32
-        
-        stp x29, x30, [sp, -64]!
+        stp x29, x30, [sp, -80]!
         mov x29, sp
         
 f03solicitar_coord:
@@ -404,55 +371,8 @@ f03resultado_agua:
         LDR x2, =LargoMensajeAguaVal
         LDR x2, [x2]
         BL f01ImprimirCadena
-        
-        // DEBUG: Imprimir valores del stack antes de retornar
-        LDR x1, =DebugMsgStack1
-        LDR x2, =LargoDebugMsgStack1Val
-        LDR x2, [x2]
-        BL f01ImprimirCadena
-        
-        // Imprimir sp actual
-        MOV x0, sp
-        BL f11ImprimirNumero
-        
-        LDR x1, =SaltoLinea
-        MOV x2, #1
-        BL f01ImprimirCadena
-        
-        // Imprimir valores en stack
-        LDR x1, =DebugMsgStack2
-        LDR x2, =LargoDebugMsgStack2Val
-        LDR x2, [x2]
-        BL f01ImprimirCadena
-        
-        LDR x0, [sp, #0]    // x29 guardado
-        BL f11ImprimirNumero
-        
-        LDR x1, =SaltoLinea
-        MOV x2, #1
-        BL f01ImprimirCadena
-        
-        LDR x1, =DebugMsgStack3
-        LDR x2, =LargoDebugMsgStack3Val
-        LDR x2, [x2]
-        BL f01ImprimirCadena
-        
-        LDR x0, [sp, #8]    // x30 guardado (dirección de retorno)
-        BL f11ImprimirNumero
-        
-        LDR x1, =SaltoLinea
-        MOV x2, #1
-        BL f01ImprimirCadena
-        
-        // Ahora intentar retornar
-        LDR x1, =DebugMsgStack4
-        LDR x2, =LargoDebugMsgStack4Val
-        LDR x2, [x2]
-        BL f01ImprimirCadena
-        
-        // Cargar resultado directamente aquí
         MOV x0, #0
-        ldp x29, x30, [sp], 64
+        ldp x29, x30, [sp], 80
         RET
 
 f03resultado_impacto:
@@ -461,7 +381,7 @@ f03resultado_impacto:
         LDR x2, [x2]
         BL f01ImprimirCadena
         MOV x0, #1
-        ldp x29, x30, [sp], 64
+        ldp x29, x30, [sp], 80
         RET
 
 f03resultado_hundido:
@@ -470,7 +390,7 @@ f03resultado_hundido:
         LDR x2, [x2]
         BL f01ImprimirCadena
         MOV x0, #2
-        ldp x29, x30, [sp], 64
+        ldp x29, x30, [sp], 80
         RET
 
 

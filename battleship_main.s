@@ -18,7 +18,7 @@
 // Dependencias externas
 .extern f01ImprimirCadena
 .extern f05LimpiarPantalla
-.extern f06InicializarSemilla
+.extern f13InicializarSemilla
 .extern f01FasePreparacion
 .extern f02BucleEnfrentamiento
 .extern MensajeBienvenida, LargoMensajeBienvenidaVal
@@ -52,7 +52,7 @@
 // ***************************************************
 _start:
         // Inicializar semilla aleatoria
-        BL f06InicializarSemilla
+        BL f13InicializarSemilla
         
         // ============================================
         // PANTALLA 1: BIENVENIDA Y CRÉDITOS

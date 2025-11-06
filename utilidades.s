@@ -31,6 +31,7 @@
 .global f10ParsearCoordenada
 .global f11ImprimirNumero
 .global f12LeerCoordenada
+.global f13InicializarSemilla
 
 
 // Dependencias externas
@@ -594,6 +595,61 @@ f12LeerCoordenada:
         MOV x2, #5
         BL f10ParsearCoordenada
         
+        ldp x29, x30, [sp], 16
+        RET
+
+
+// ******  Nombre  ***********************************
+// f13InicializarSemilla
+// ******  Descripción  ******************************
+// Inicializa la semilla del generador aleatorio
+// usando el syscall getrandom de Linux para obtener
+// un valor verdaderamente aleatorio del sistema.
+// ******  Retorno  **********************************
+// Ninguno
+// ******  Entradas  *********************************
+// Ninguna
+// ******  Errores  **********************************
+// Si getrandom falla, usa una semilla por defecto
+// basada en el tiempo del sistema
+// ***************************************************
+f13InicializarSemilla:
+        stp x29, x30, [sp, -16]!
+        mov x29, sp
+        
+        // Intentar obtener bytes aleatorios con getrandom
+        // syscall 278 en ARM64 Linux
+        MOV x8, #278            // Syscall getrandom
+        LDR x0, =Semilla        // Buffer donde guardar
+        MOV x1, #8              // 8 bytes (64 bits)
+        MOV x2, #0              // Flags = 0 (bloqueante si es necesario)
+        SVC #0
+        
+        // Verificar si tuvo éxito (retorna bytes leídos)
+        CMP x0, #8
+        BEQ f13fin              // Si leyó 8 bytes, ya está
+        
+        // Si falló getrandom, usar timestamp como semilla alternativa
+        // syscall 169 = gettimeofday (o usar clock_gettime)
+        MOV x8, #169            // Syscall gettimeofday
+        SUB sp, sp, #16         // Espacio para timeval struct
+        MOV x0, sp              // Puntero a timeval
+        MOV x1, #0              // timezone = NULL
+        SVC #0
+        
+        LDR x1, [sp]            // Cargar tv_sec
+        LDR x2, [sp, #8]        // Cargar tv_usec
+        ADD sp, sp, #16         // Restaurar stack
+        
+        // Combinar segundos y microsegundos para crear semilla
+        LSL x1, x1, #20         // Desplazar segundos
+        EOR x1, x1, x2          // XOR con microsegundos
+        
+        // Guardar en Semilla global
+        LDR x0, =Semilla
+        STR x1, [x0]
+
+f13fin:
         ldp x29, x30, [sp], 16
         RET
 

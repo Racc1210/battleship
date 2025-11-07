@@ -43,6 +43,8 @@
 .extern TableroJugador, TableroComputadora
 .extern TableroDisparosComputadora, TableroDisparosJugador
 .extern BarcosJugador, BarcosComputadora
+.extern ContadorImpactosJugador, ContadorImpactosComputadora
+.extern EstadoBarcosJugador, EstadoBarcosComputadora
 .extern MunicionComputadora
 .extern PatronExocet1, PatronExocet2
 .extern PatronApache1, PatronApache2
@@ -152,10 +154,10 @@ f02TurnoIA:
         
         LDR x0, =TableroJugador
         LDR x1, =TableroDisparosComputadora
-        LDR x2, =BarcosJugador
-        LDR x3, [sp, #16]       // Fila
-        LDR x4, [sp, #24]       // Columna
-        MOV x5, #0              // Es IA
+        LDR x2, =ContadorImpactosJugador
+        LDR x3, =EstadoBarcosJugador
+        LDR x4, [sp, #16]       // Fila
+        LDR x5, [sp, #24]       // Columna
         BL f01ProcesarDisparoEnCelda
         B f02procesar_resultado
 
@@ -1085,11 +1087,11 @@ f12procesar_celda_ia:
         LDR x0, =TableroJugador
         STR x1, [sp, #40]
         STR x2, [sp, #48]
-        MOV x3, x1
-        MOV x4, x2
+        MOV x4, x1              // Fila
+        MOV x5, x2              // Columna
         LDR x1, =TableroDisparosComputadora
-        LDR x2, =BarcosJugador
-        MOV x5, #0              // Es IA
+        LDR x2, =ContadorImpactosJugador
+        LDR x3, =EstadoBarcosJugador
         BL f01ProcesarDisparoEnCelda
         
         // Actualizar mejor resultado

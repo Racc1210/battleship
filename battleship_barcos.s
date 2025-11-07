@@ -37,14 +37,19 @@
 .extern f02LeerCadena
 .extern f05ValidarCoordenada
 .extern f07ActualizarCelda
+.extern f18ActualizarCeldaCompleta
 .extern f02ImprimirTableroPropio
 .extern f10ParsearCoordenada
 .extern f12LeerCoordenada
 .extern f02NumeroAleatorio
 .extern f05LimpiarPantalla
 .extern TableroJugador, TableroComputadora
+.extern ContadorImpactosJugador, ContadorImpactosComputadora
+.extern EstadoBarcosJugador, EstadoBarcosComputadora
 .extern FILAS, COLUMNAS
 .extern ESTADO_BARCO
+.extern CELDA_DESCUBIERTO_NO, CELDA_DESCUBIERTO_SI
+.extern CELDA_TIPO_AGUA, CELDA_TIPO_BARCO, CELDA_ID_NINGUNO
 .extern TIPO_PORTAVIONES, TIPO_ACORAZADO, TIPO_DESTRUCTOR
 .extern TIPO_SUBMARINO, TIPO_PATRULLERO
 .extern TAMANO_PORTAVIONES, TAMANO_ACORAZADO, TAMANO_DESTRUCTOR
@@ -518,23 +523,20 @@ f06loop_vertical:
         STR x0, [sp, #48]
         STR x1, [sp, #56]
         
-        // Obtener estado de celda en TableroJugador
+        // Obtener tipo de celda usando f16ObtenerTipo
         LDR x3, =TableroJugador
-        MOV x4, #14
-        MUL x5, x0, x4          // x5 = fila × 14
-        ADD x5, x5, x1          // x5 = índice
-        LSL x5, x5, #3          // × 8 bytes
-        ADD x3, x3, x5
-        LDR x6, [x3]            // Cargar estado
+        // x0 = fila, x1 = columna (ya cargadas)
+        BL f16ObtenerTipo       // Retorna tipo en x0
         
-        // Verificar si hay barco
-        LDR x7, =ESTADO_BARCO
+        // Verificar si es tipo BARCO (2)
+        LDR x7, =CELDA_TIPO_BARCO
         LDR x7, [x7]
-        CMP x6, x7
+        CMP x0, x7
         BEQ f06hay_solapamiento
         
         LDR x0, [sp, #48]
-        ADD x0, x0, #1
+        LDR x1, [sp, #56]
+        ADD x0, x0, #1          // Siguiente fila
         B f06loop_vertical
 
 f06recorrer_horizontal:
@@ -561,23 +563,20 @@ f06loop_horizontal:
         STR x0, [sp, #48]
         STR x1, [sp, #56]
         
-        // Obtener estado de celda en TableroJugador
+        // Obtener tipo de celda usando f16ObtenerTipo
         LDR x4, =TableroJugador
-        MOV x5, #14
-        MUL x6, x0, x5          // x6 = fila × 14
-        ADD x6, x6, x1          // x6 = índice
-        LSL x6, x6, #3          // × 8 bytes
-        ADD x4, x4, x6
-        LDR x7, [x4]            // Cargar estado
+        // x0 = fila, x1 = columna (ya cargadas)
+        BL f16ObtenerTipo       // Retorna tipo en x0
         
-        // Verificar si hay barco
-        LDR x8, =ESTADO_BARCO
+        // Verificar si es tipo BARCO (2)
+        LDR x8, =CELDA_TIPO_BARCO
         LDR x8, [x8]
-        CMP x7, x8
+        CMP x0, x8
         BEQ f06hay_solapamiento
         
+        LDR x0, [sp, #48]
         LDR x1, [sp, #56]
-        ADD x1, x1, #1
+        ADD x1, x1, #1          // Siguiente columna
         B f06loop_horizontal
 
 f06sin_solapamiento:
@@ -594,10 +593,9 @@ f06hay_solapamiento:
 // ******  Nombre  ***********************************
 // f07ColocarBarcoEnTablero
 // ******  Descripción  ******************************
-// Coloca un barco en el tablero del jugador,
-// marcando todas sus celdas como BARCO y
-// almacenando su información en la estructura
-// de datos de barcos.
+// Coloca un barco en el tablero del jugador usando
+// la nueva estructura [descubierto, tipo, id_barco].
+// Inicializa contadores de impactos y estado.
 // ******  Retorno  **********************************
 // Ninguno
 // ******  Entradas  *********************************
@@ -614,22 +612,39 @@ f07ColocarBarcoEnTablero:
         stp x29, x30, [sp, -80]!
         mov x29, sp
         
-        // Guardar todos los parámetros
-        STR x0, [sp, #16]       // Índice
+        // Guardar parámetros
+        STR x0, [sp, #16]       // Índice del barco
         STR x1, [sp, #24]       // Fila proa
         STR x2, [sp, #32]       // Columna proa
         STR x3, [sp, #40]       // Fila popa
         STR x4, [sp, #48]       // Columna popa
         STR x5, [sp, #56]       // Tamaño
         
-        // Determinar orientación
+        // Calcular ID del barco (índice + 1)
+        ADD x0, x0, #1          // ID = índice + 1
+        STR x0, [sp, #64]       // Guardar ID
+        
+        // Inicializar contadores para este barco
+        LDR x10, =ContadorImpactosJugador
+        LSL x11, x0, #3         // ID × 8
+        ADD x10, x10, x11
+        MOV x12, #0
+        STR x12, [x10]          // ContadorImpactos[ID] = 0
+        
+        LDR x10, =EstadoBarcosJugador
+        ADD x10, x10, x11
+        STR x12, [x10]          // EstadoBarcos[ID] = 0 (activo)
+        
+        // Determinar orientación y marcar celdas
+        LDR x1, [sp, #24]       // Fila proa
+        LDR x3, [sp, #40]       // Fila popa
         CMP x1, x3
         BEQ f07marcar_horizontal
         
 f07marcar_vertical:
         // Asegurar orden correcto
-        LDR x1, [sp, #24]       // Fila proa
-        LDR x3, [sp, #40]       // Fila popa
+        LDR x1, [sp, #24]
+        LDR x3, [sp, #40]
         CMP x1, x3
         BLE f07vertical_ok
         STR x3, [sp, #24]
@@ -638,33 +653,32 @@ f07marcar_vertical:
 f07vertical_ok:
         LDR x1, [sp, #24]       // Fila inicio
         LDR x3, [sp, #40]       // Fila fin
-        LDR x2, [sp, #32]       // Columna
-        LDR x10, =ORIENTACION_VERTICAL
-        LDR x10, [x10]
-        STR x10, [sp, #64]      // Guardar orientación
+        LDR x2, [sp, #32]       // Columna (fija)
         
 f07loop_marcar_vertical:
         CMP x1, x3
-        BGT f07guardar_estructura
+        BGT f07fin_colocacion
         
-        // Marcar celda como BARCO
+        // Actualizar celda con nueva estructura
         LDR x0, =TableroJugador
-        LDR x5, =ESTADO_BARCO
-        LDR x5, [x5]
+        // x1 = fila, x2 = columna
+        STR x1, [sp, #72]       // Guardar fila
         
-        // Calcular índice
-        MOV x6, #14
-        MUL x7, x1, x6
-        ADD x7, x7, x2
-        LSL x7, x7, #3
-        ADD x0, x0, x7
-        STR x5, [x0]
+        LDR x3, =CELDA_DESCUBIERTO_SI
+        LDR x3, [x3]            // descubierto = 1 (visible para jugador)
+        LDR x4, =CELDA_TIPO_BARCO
+        LDR x4, [x4]            // tipo = 2 (barco)
+        LDR x5, [sp, #64]       // id_barco
         
-        ADD x1, x1, #1
+        BL f18ActualizarCeldaCompleta
+        
+        LDR x1, [sp, #72]       // Recuperar fila
+        LDR x2, [sp, #32]       // Recuperar columna
+        ADD x1, x1, #1          // Siguiente fila
         B f07loop_marcar_vertical
 
 f07marcar_horizontal:
-        LDR x1, [sp, #24]       // Fila
+        LDR x1, [sp, #24]       // Fila (fija)
         LDR x2, [sp, #32]       // Columna proa
         LDR x4, [sp, #48]       // Columna popa
         CMP x2, x4
@@ -673,65 +687,33 @@ f07marcar_horizontal:
         STR x2, [sp, #48]
         
 f07horizontal_ok:
-        LDR x1, [sp, #24]       // Fila
+        LDR x1, [sp, #24]       // Fila (fija)
         LDR x2, [sp, #32]       // Columna inicio
         LDR x4, [sp, #48]       // Columna fin
-        LDR x10, =ORIENTACION_HORIZONTAL
-        LDR x10, [x10]
-        STR x10, [sp, #64]      // Guardar orientación
         
 f07loop_marcar_horizontal:
         CMP x2, x4
-        BGT f07guardar_estructura
+        BGT f07fin_colocacion
         
-        // Marcar celda como BARCO
+        // Actualizar celda
         LDR x0, =TableroJugador
-        LDR x5, =ESTADO_BARCO
-        LDR x5, [x5]
+        STR x1, [sp, #72]       // Guardar fila
+        STR x2, [sp, #76]       // Guardar columna
         
-        // Calcular índice
-        MOV x6, #14
-        MUL x7, x1, x6
-        ADD x7, x7, x2
-        LSL x7, x7, #3
-        ADD x0, x0, x7
-        STR x5, [x0]
+        LDR x3, =CELDA_DESCUBIERTO_SI
+        LDR x3, [x3]            // descubierto = 1
+        LDR x4, =CELDA_TIPO_BARCO
+        LDR x4, [x4]            // tipo = 2
+        LDR x5, [sp, #64]       // id_barco
         
-        ADD x2, x2, #1
+        BL f18ActualizarCeldaCompleta
+        
+        LDR x1, [sp, #72]       // Recuperar fila
+        LDR x2, [sp, #76]       // Recuperar columna
+        ADD x2, x2, #1          // Siguiente columna
         B f07loop_marcar_horizontal
 
-f07guardar_estructura:
-        // Guardar información del barco en estructura
-        LDR x0, [sp, #16]       // Índice del barco
-        LDR x10, =BarcosJugador
-        MOV x11, #40            // Tamaño de estructura
-        MUL x0, x0, x11
-        ADD x10, x10, x0        // Dirección de estructura
-        
-        // Guardar datos (simplificado por ahora)
-        LDR x1, [sp, #24]       // Fila proa
-        STRB w1, [x10, #2]
-        LDR x1, [sp, #32]       // Columna proa
-        STRB w1, [x10, #3]
-        LDR x1, [sp, #40]       // Fila popa
-        STRB w1, [x10, #4]
-        LDR x1, [sp, #48]       // Columna popa
-        STRB w1, [x10, #5]
-        LDR x1, [sp, #56]       // Tamaño
-        STRB w1, [x10, #1]
-        LDR x1, [sp, #64]       // Orientación
-        STRB w1, [x10, #6]
-        
-        // Estado inicial: activo, sin impactos
-        MOV w1, #0
-        STRB w1, [x10, #7]      // Impactos = 0
-        STRB w1, [x10, #8]      // Estado = activo
-        
-        // Asignar ID del barco (índice + 1)
-        LDR x1, [sp, #16]       // Índice del barco (0-4)
-        ADD w1, w1, #1          // ID = índice + 1 (1-5)
-        STRB w1, [x10, #9]      // ID del barco
-        
+f07fin_colocacion:
         ldp x29, x30, [sp], 80
         RET
 
@@ -854,18 +836,153 @@ f09generar_horizontal:
         
 f09validar_ia:
         // Validar solapamiento en TableroComputadora
-        // (implementación simplificada - marcar directamente)
+        // Necesitamos verificar si las celdas están libres
+        LDR x0, [sp, #40]       // Fila proa
+        LDR x1, [sp, #48]       // Columna proa
+        LDR x2, [sp, #32]       // Orientación
+        CMP x2, #0
+        BEQ f09validar_horizontal
         
-        // Por ahora, marcar directamente sin validación exhaustiva
-        // TODO: Implementar validación completa de solapamiento para IA
+f09validar_vertical:
+        // Vertical: recorrer filas
+        LDR x2, [sp, #40]       // Fila inicio
+        LDR x3, [sp, #24]       // Tamaño
+        ADD x3, x2, x3          // Fila fin + 1
+        SUB x3, x3, #1          // Fila fin
+        LDR x1, [sp, #48]       // Columna (constante)
         
-        LDR x0, [sp, #16]       // Índice
-        LDR x1, [sp, #40]       // Fila inicio
-        LDR x2, [sp, #48]       // Columna inicio
-        LDR x3, [sp, #56]       // Fila/columna fin
-        LDR x4, [sp, #32]       // Orientación
+f09loop_validar_vert:
+        CMP x2, x3
+        BGT f09colocar_ia       // Todas libres
         
-        // Marcar en TableroComputadora (implementación pendiente)
+        // Verificar celda [x2, x1]
+        MOV x0, x2
+        LDR x4, =TableroComputadora
+        BL f16ObtenerTipo
+        
+        LDR x5, =CELDA_TIPO_BARCO
+        LDR x5, [x5]
+        CMP x0, x5
+        BEQ f09intentar_colocacion  // Solapamiento, reintentar
+        
+        ADD x2, x2, #1
+        B f09loop_validar_vert
+        
+f09validar_horizontal:
+        // Horizontal: recorrer columnas
+        LDR x0, [sp, #40]       // Fila (constante)
+        LDR x1, [sp, #48]       // Columna inicio
+        LDR x3, [sp, #24]       // Tamaño
+        ADD x3, x1, x3          // Columna fin + 1
+        SUB x3, x3, #1          // Columna fin
+        
+f09loop_validar_horiz:
+        CMP x1, x3
+        BGT f09colocar_ia       // Todas libres
+        
+        // Verificar celda [x0, x1]
+        LDR x4, =TableroComputadora
+        BL f16ObtenerTipo
+        
+        LDR x5, =CELDA_TIPO_BARCO
+        LDR x5, [x5]
+        CMP x0, x5
+        BEQ f09intentar_colocacion  // Solapamiento, reintentar
+        
+        ADD x1, x1, #1
+        LDR x0, [sp, #40]       // Restaurar fila
+        B f09loop_validar_horiz
+
+f09colocar_ia:
+        // Colocar barco en TableroComputadora
+        LDR x0, [sp, #16]       // Índice del barco
+        LDR x5, [sp, #24]       // Tamaño
+        
+        // Inicializar ContadorImpactosComputadora[id] = 0
+        ADD x1, x0, #1          // id_barco = índice + 1
+        LDR x2, =ContadorImpactosComputadora
+        LSL x3, x1, #3          // × 8 bytes
+        ADD x2, x2, x3
+        STR xzr, [x2]
+        
+        // Inicializar EstadoBarcosComputadora[id] = 0
+        LDR x2, =EstadoBarcosComputadora
+        ADD x2, x2, x3
+        STR xzr, [x2]
+        
+        // Marcar celdas según orientación
+        LDR x2, [sp, #32]       // Orientación
+        CMP x2, #0
+        BEQ f09marcar_horizontal
+        
+f09marcar_vertical:
+        LDR x2, [sp, #40]       // Fila inicio
+        LDR x3, [sp, #24]       // Tamaño
+        ADD x3, x2, x3          // Fila fin + 1
+        SUB x3, x3, #1          // Fila fin
+        LDR x4, [sp, #48]       // Columna (constante)
+        ADD x6, x0, #1          // id_barco = índice + 1
+        
+f09loop_marcar_vert:
+        CMP x2, x3
+        BGT f09fin_colocacion
+        
+        // Actualizar celda [x2, x4] con [descubierto=0, tipo=2, id_barco=x6]
+        LDR x0, =TableroComputadora
+        MOV x1, x2              // Fila
+        MOV x7, x4              // Columna (guardar)
+        STR x2, [sp, #48]       // Guardar fila
+        STR x3, [sp, #56]       // Guardar fin
+        
+        MOV x2, x7              // x2 = columna
+        LDR x3, =CELDA_DESCUBIERTO_NO
+        LDR x3, [x3]            // descubierto = 0 (oculto)
+        LDR x4, =CELDA_TIPO_BARCO
+        LDR x4, [x4]            // tipo = 2
+        MOV x5, x6              // id_barco
+        BL f18ActualizarCeldaCompleta
+        
+        LDR x2, [sp, #48]       // Recuperar fila
+        LDR x3, [sp, #56]       // Recuperar fin
+        LDR x4, [sp, #48]       // Columna (recuperar del stack correcto)
+        MOV x4, x7              // Restaurar columna original
+        ADD x2, x2, #1
+        B f09loop_marcar_vert
+        
+f09marcar_horizontal:
+        LDR x2, [sp, #40]       // Fila (constante)
+        LDR x3, [sp, #48]       // Columna inicio
+        LDR x4, [sp, #24]       // Tamaño
+        ADD x4, x3, x4          // Columna fin + 1
+        SUB x4, x4, #1          // Columna fin
+        ADD x6, x0, #1          // id_barco = índice + 1
+        
+f09loop_marcar_horiz:
+        CMP x3, x4
+        BGT f09fin_colocacion
+        
+        // Actualizar celda [x2, x3] con [descubierto=0, tipo=2, id_barco=x6]
+        LDR x0, =TableroComputadora
+        MOV x1, x2              // Fila
+        STR x2, [sp, #48]       // Guardar fila
+        STR x3, [sp, #56]       // Guardar columna
+        STR x4, [sp, #32]       // Guardar fin
+        
+        MOV x2, x3              // x2 = columna
+        LDR x3, =CELDA_DESCUBIERTO_NO
+        LDR x3, [x3]            // descubierto = 0 (oculto)
+        LDR x4, =CELDA_TIPO_BARCO
+        LDR x4, [x4]            // tipo = 2
+        MOV x5, x6              // id_barco
+        BL f18ActualizarCeldaCompleta
+        
+        LDR x2, [sp, #48]       // Recuperar fila
+        LDR x3, [sp, #56]       // Recuperar columna
+        LDR x4, [sp, #32]       // Recuperar fin
+        ADD x3, x3, #1
+        B f09loop_marcar_horiz
+
+f09fin_colocacion:
         
         ldp x29, x30, [sp], 48
         RET

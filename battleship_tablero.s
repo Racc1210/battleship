@@ -28,10 +28,18 @@
 .global f10RegistrarAtaqueMultiple
 .global f11EsCeldaUltimoAtaque
 .global f12LimpiarUltimoAtaque
+.global f15ObtenerDescubierto
+.global f16ObtenerTipo
+.global f17ObtenerIdBarco
+.global f18ActualizarCeldaCompleta
 .global TableroJugador
 .global TableroComputadora
 .global TableroDisparosJugador
 .global TableroDisparosComputadora
+.global ContadorImpactosJugador
+.global ContadorImpactosComputadora
+.global EstadoBarcosJugador
+.global EstadoBarcosComputadora
 
 // Dependencias externas
 .extern f01ImprimirCadena
@@ -41,6 +49,11 @@
 .extern ESTADO_VACIA, ESTADO_VACIA_IMPACTADA
 .extern ESTADO_BARCO, ESTADO_BARCO_IMPACTADO
 .extern ESTADO_DESCONOCIDA, ESTADO_ENEMIGO_AGUA, ESTADO_ENEMIGO_BARCO
+.extern CELDA_DESCUBIERTO_NO, CELDA_DESCUBIERTO_SI
+.extern CELDA_TIPO_AGUA, CELDA_TIPO_AGUA_IMPACT
+.extern CELDA_TIPO_BARCO, CELDA_TIPO_BARCO_IMPACT
+.extern CELDA_ID_NINGUNO
+.extern TamanosPorID
 .extern SimboloAgua, SimboloAguaImpactada
 .extern SimboloBarco, SimboloBarcoImpactado
 .extern SimboloDesconocida, SimboloEnemigoAgua, SimboloEnemigoBarco
@@ -61,10 +74,20 @@
 .section .bss
 
 // Tableros principales: 10 filas × 14 columnas = 140 celdas × 8 bytes
+// Nueva estructura por celda: [descubierto:1byte][tipo:1byte][id_barco:1byte][padding:5bytes]
 TableroJugador:          .skip 1120  // Tablero propio con barcos
 TableroComputadora:      .skip 1120  // Tablero enemigo (oculto)
 TableroDisparosJugador:  .skip 1120  // Registro de disparos del jugador
 TableroDisparosComputadora: .skip 1120 // Registro de disparos de la IA
+
+// Arrays auxiliares para tracking de barcos
+// Contadores de impactos: [0]=sin uso, [1-5]=contadores por barco
+ContadorImpactosJugador:    .skip 48  // 6 × 8 bytes
+ContadorImpactosComputadora: .skip 48  // 6 × 8 bytes
+
+// Estados de barcos: 0=activo, 1=hundido
+EstadoBarcosJugador:         .skip 48  // 6 × 8 bytes
+EstadoBarcosComputadora:     .skip 48  // 6 × 8 bytes
 
 // Buffer temporal para conversión de números
 BufferTemp:              .skip 8
@@ -86,11 +109,8 @@ ColorReset:     .asciz "\033[0m"    // Reset color
 // ******  Nombre  ***********************************
 // f01InicializarTableros
 // ******  Descripción  ******************************
-// Inicializa los 4 tableros del juego:
-// - Tablero del jugador (todas celdas vacías)
-// - Tablero de la computadora (todas celdas vacías)
-// - Tablero de disparos del jugador (desconocidas)
-// - Tablero de disparos de la computadora (vacías)
+// Inicializa los 4 tableros con la nueva estructura
+// [descubierto, tipo, id_barco] y los arrays auxiliares.
 // ******  Retorno  **********************************
 // Ninguno
 // ******  Entradas  *********************************
@@ -99,63 +119,141 @@ ColorReset:     .asciz "\033[0m"    // Reset color
 // Ninguno
 // ***************************************************
 f01InicializarTableros:
-        stp x29, x30, [sp, -16]!
+        stp x29, x30, [sp, -32]!
         mov x29, sp
         
-        // Inicializar tablero del jugador (todas vacías)
+        // Inicializar tablero del jugador: [1, 0, 0] = visible, agua, sin barco
         LDR x0, =TableroJugador
-        LDR x1, =ESTADO_VACIA
-        LDR x1, [x1]
         LDR x2, =TOTAL_CELDAS
         LDR x2, [x2]            // x2 = 140
         
 f01loop_jugador:
         CMP x2, #0
         BLE f01init_computadora
-        STR x1, [x0]
+        
+        MOV w1, #1              // descubierto = 1 (jugador ve su tablero)
+        STRB w1, [x0, #0]
+        MOV w1, #0              // tipo = 0 (agua)
+        STRB w1, [x0, #1]
+        MOV w1, #0              // id_barco = 0 (ninguno)
+        STRB w1, [x0, #2]
+        
         ADD x0, x0, #8
         SUB x2, x2, #1
         B f01loop_jugador
         
 f01init_computadora:
-        // Inicializar tablero de la computadora (todas vacías)
+        // Tablero computadora: [0, 0, 0] = no visible, agua, sin barco
         LDR x0, =TableroComputadora
-        LDR x1, =ESTADO_VACIA
-        LDR x1, [x1]
         LDR x2, =TOTAL_CELDAS
         LDR x2, [x2]
         
 f01loop_computadora:
         CMP x2, #0
         BLE f01init_disparos_jugador
-        STR x1, [x0]
+        
+        MOV w1, #0              // descubierto = 0 (oculto)
+        STRB w1, [x0, #0]
+        MOV w1, #0              // tipo = 0 (agua)
+        STRB w1, [x0, #1]
+        MOV w1, #0              // id_barco = 0
+        STRB w1, [x0, #2]
+        
         ADD x0, x0, #8
         SUB x2, x2, #1
         B f01loop_computadora
         
 f01init_disparos_jugador:
-        // Inicializar disparos del jugador (todas desconocidas)
+        // Disparos jugador: [0, 0, 0] = no explorado
         LDR x0, =TableroDisparosJugador
-        LDR x1, =ESTADO_DESCONOCIDA
-        LDR x1, [x1]
         LDR x2, =TOTAL_CELDAS
         LDR x2, [x2]
         
 f01loop_disparos_j:
         CMP x2, #0
         BLE f01init_disparos_comp
-        STR x1, [x0]
+        
+        MOV w1, #0
+        STRB w1, [x0, #0]
+        STRB w1, [x0, #1]
+        STRB w1, [x0, #2]
+        
         ADD x0, x0, #8
         SUB x2, x2, #1
         B f01loop_disparos_j
         
 f01init_disparos_comp:
-        // Inicializar disparos de la computadora (todas vacías)
+        // Disparos computadora: [0, 0, 0]
         LDR x0, =TableroDisparosComputadora
-        LDR x1, =ESTADO_VACIA
-        LDR x1, [x1]
         LDR x2, =TOTAL_CELDAS
         LDR x2, [x2]
+        
+f01loop_disparos_c:
+        CMP x2, #0
+        BLE f01init_contadores
+        
+        MOV w1, #0
+        STRB w1, [x0, #0]
+        STRB w1, [x0, #1]
+        STRB w1, [x0, #2]
+        
+        ADD x0, x0, #8
+        SUB x2, x2, #1
+        B f01loop_disparos_c
+        
+f01init_contadores:
+        // Inicializar contadores de impactos (todos en 0)
+        LDR x0, =ContadorImpactosJugador
+        MOV x1, #6              // 6 elementos (índices 0-5)
+f01loop_cont_j:
+        CMP x1, #0
+        BLE f01init_cont_comp
+        MOV x2, #0
+        STR x2, [x0]
+        ADD x0, x0, #8
+        SUB x1, x1, #1
+        B f01loop_cont_j
+        
+f01init_cont_comp:
+        LDR x0, =ContadorImpactosComputadora
+        MOV x1, #6
+f01loop_cont_c:
+        CMP x1, #0
+        BLE f01init_estados
+        MOV x2, #0
+        STR x2, [x0]
+        ADD x0, x0, #8
+        SUB x1, x1, #1
+        B f01loop_cont_c
+        
+f01init_estados:
+        // Inicializar estados de barcos (todos activos = 0)
+        LDR x0, =EstadoBarcosJugador
+        MOV x1, #6
+f01loop_est_j:
+        CMP x1, #0
+        BLE f01init_est_comp
+        MOV x2, #0
+        STR x2, [x0]
+        ADD x0, x0, #8
+        SUB x1, x1, #1
+        B f01loop_est_j
+        
+f01init_est_comp:
+        LDR x0, =EstadoBarcosComputadora
+        MOV x1, #6
+f01loop_est_c:
+        CMP x1, #0
+        BLE f01fin
+        MOV x2, #0
+        STR x2, [x0]
+        ADD x0, x0, #8
+        SUB x1, x1, #1
+        B f01loop_est_c
+        
+f01fin:
+        ldp x29, x30, [sp], 32
+        RET        LDR x2, [x2]
         
 f01loop_disparos_c:
         CMP x2, #0
@@ -479,29 +577,30 @@ f02loop_columnas:
         
         STR x20, [sp, #32]      // Guardar contador columna
         
-        // Obtener estado de la celda
+        // Obtener tipo de la celda usando nueva estructura
         LDR x0, =TableroJugador
         LDR x1, [sp, #16]       // fila
         MOV x2, x20             // columna
-        BL f06ObtenerEstadoCelda
+        BL f16ObtenerTipo       // Retorna tipo en x0
         
-        // Determinar símbolo según estado
-        LDR x1, =ESTADO_VACIA
+        // Determinar símbolo según tipo
+        // tipo: 0=agua, 1=agua_impact, 2=barco, 3=barco_impact
+        LDR x1, =CELDA_TIPO_AGUA
         LDR x1, [x1]
         CMP x0, x1
         BEQ f02imprimir_agua
         
-        LDR x1, =ESTADO_VACIA_IMPACTADA
+        LDR x1, =CELDA_TIPO_AGUA_IMPACT
         LDR x1, [x1]
         CMP x0, x1
         BEQ f02imprimir_agua_impactada
         
-        LDR x1, =ESTADO_BARCO
+        LDR x1, =CELDA_TIPO_BARCO
         LDR x1, [x1]
         CMP x0, x1
         BEQ f02imprimir_barco
         
-        LDR x1, =ESTADO_BARCO_IMPACTADO
+        LDR x1, =CELDA_TIPO_BARCO_IMPACT
         LDR x1, [x1]
         CMP x0, x1
         BEQ f02imprimir_barco_impactado
@@ -1116,6 +1215,158 @@ f12LimpiarUltimoAtaque:
         RET
 
 
+// ******  Nombre  ***********************************
+// f15ObtenerDescubierto
+// ******  Descripción  ******************************
+// Obtiene el campo 'descubierto' de una celda.
+// ******  Retorno  **********************************
+// x0: Valor descubierto (0 o 1)
+// ******  Entradas  *********************************
+// x0: Dirección base del tablero
+// x1: Fila (0-9)
+// x2: Columna (0-13)
+// ******  Errores  **********************************
+// Ninguno
+// ***************************************************
+f15ObtenerDescubierto:
+        stp x29, x30, [sp, -32]!
+        mov x29, sp
+        
+        STR x0, [sp, #16]       // Guardar dirección
+        
+        // Calcular índice
+        MOV x0, x1              // fila
+        MOV x1, x2              // columna
+        BL f08CalcularIndice
+        
+        // Acceder a la celda: dirección + (índice × 8)
+        LDR x1, [sp, #16]
+        LSL x0, x0, #3          // índice × 8
+        ADD x1, x1, x0
+        LDRB w0, [x1, #0]       // Leer byte +0 (descubierto)
+        
+        ldp x29, x30, [sp], 32
+        RET
+
+
+// ******  Nombre  ***********************************
+// f16ObtenerTipo
+// ******  Descripción  ******************************
+// Obtiene el campo 'tipo' de una celda.
+// ******  Retorno  **********************************
+// x0: Tipo de celda (0-3)
+// ******  Entradas  *********************************
+// x0: Dirección base del tablero
+// x1: Fila (0-9)
+// x2: Columna (0-13)
+// ******  Errores  **********************************
+// Ninguno
+// ***************************************************
+f16ObtenerTipo:
+        stp x29, x30, [sp, -32]!
+        mov x29, sp
+        
+        STR x0, [sp, #16]       // Guardar dirección
+        
+        // Calcular índice
+        MOV x0, x1              // fila
+        MOV x1, x2              // columna
+        BL f08CalcularIndice
+        
+        // Acceder a la celda
+        LDR x1, [sp, #16]
+        LSL x0, x0, #3          // índice × 8
+        ADD x1, x1, x0
+        LDRB w0, [x1, #1]       // Leer byte +1 (tipo)
+        
+        ldp x29, x30, [sp], 32
+        RET
+
+
+// ******  Nombre  ***********************************
+// f17ObtenerIdBarco
+// ******  Descripción  ******************************
+// Obtiene el campo 'id_barco' de una celda.
+// ******  Retorno  **********************************
+// x0: ID del barco (0-5)
+// ******  Entradas  *********************************
+// x0: Dirección base del tablero
+// x1: Fila (0-9)
+// x2: Columna (0-13)
+// ******  Errores  **********************************
+// Ninguno
+// ***************************************************
+f17ObtenerIdBarco:
+        stp x29, x30, [sp, -32]!
+        mov x29, sp
+        
+        STR x0, [sp, #16]       // Guardar dirección
+        
+        // Calcular índice
+        MOV x0, x1              // fila
+        MOV x1, x2              // columna
+        BL f08CalcularIndice
+        
+        // Acceder a la celda
+        LDR x1, [sp, #16]
+        LSL x0, x0, #3          // índice × 8
+        ADD x1, x1, x0
+        LDRB w0, [x1, #2]       // Leer byte +2 (id_barco)
+        
+        ldp x29, x30, [sp], 32
+        RET
+
+
+// ******  Nombre  ***********************************
+// f18ActualizarCeldaCompleta
+// ******  Descripción  ******************************
+// Actualiza todos los campos de una celda.
+// ******  Retorno  **********************************
+// Ninguno
+// ******  Entradas  *********************************
+// x0: Dirección base del tablero
+// x1: Fila (0-9)
+// x2: Columna (0-13)
+// x3: Descubierto (0 o 1)
+// x4: Tipo (0-3)
+// x5: ID del barco (0-5)
+// ******  Errores  **********************************
+// Ninguno
+// ***************************************************
+f18ActualizarCeldaCompleta:
+        stp x29, x30, [sp, -48]!
+        mov x29, sp
+        
+        STR x0, [sp, #16]       // Dirección
+        STR x3, [sp, #24]       // Descubierto
+        STR x4, [sp, #32]       // Tipo
+        STR x5, [sp, #40]       // ID barco
+        
+        // Calcular índice
+        MOV x0, x1              // fila
+        MOV x1, x2              // columna
+        BL f08CalcularIndice
+        
+        // Acceder a la celda
+        LDR x1, [sp, #16]
+        LSL x0, x0, #3          // índice × 8
+        ADD x1, x1, x0          // x1 = dirección de la celda
+        
+        // Escribir campos
+        LDR x3, [sp, #24]       // Descubierto
+        STRB w3, [x1, #0]
+        LDR x4, [sp, #32]       // Tipo
+        STRB w4, [x1, #1]
+        LDR x5, [sp, #40]       // ID barco
+        STRB w5, [x1, #2]
+        
+        ldp x29, x30, [sp], 48
+        RET
+
+
+// ============================================
+// FIN DEL ARCHIVO
+// ============================================
 // ============================================
 // FIN DEL ARCHIVO
 // ============================================

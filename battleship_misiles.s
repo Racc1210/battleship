@@ -50,6 +50,8 @@
 .extern TableroComputadora, TableroJugador
 .extern TableroDisparosJugador, TableroDisparosComputadora
 .extern BarcosComputadora, BarcosJugador
+.extern ContadorImpactosComputadora, ContadorImpactosJugador
+.extern EstadoBarcosComputadora, EstadoBarcosJugador
 .extern PatronExocet1, PatronExocet2
 .extern PatronApache1, PatronApache2
 .extern PatronTomahawk
@@ -346,10 +348,10 @@ f03solicitar_coord:
         // Procesar disparo
         LDR x0, =TableroComputadora
         LDR x1, =TableroDisparosJugador
-        LDR x2, =BarcosComputadora
-        LDR x3, [sp, #16]       // Fila
-        LDR x4, [sp, #24]       // Columna
-        MOV x5, #1              // Es jugador
+        LDR x2, =ContadorImpactosComputadora
+        LDR x3, =EstadoBarcosComputadora
+        LDR x4, [sp, #16]       // Fila
+        LDR x5, [sp, #24]       // Columna
         BL f01ProcesarDisparoEnCelda
         
         // x0 tiene el resultado, x1 tiene el ID del barco (si hundido)
@@ -704,10 +706,10 @@ f07recorrer_torpedo:
         // Procesar celda actual
         LDR x0, =TableroComputadora
         LDR x1, =TableroDisparosJugador
-        LDR x2, =BarcosComputadora
-        MOV x3, x19
-        MOV x4, x20
-        MOV x5, #1
+        LDR x2, =ContadorImpactosComputadora
+        LDR x3, =EstadoBarcosComputadora
+        MOV x4, x19
+        MOV x5, x20
         BL f01ProcesarDisparoEnCelda
         
         // Si impactó barco, terminar
@@ -879,11 +881,11 @@ f08procesar_celda:
         
         // Procesar disparo
         LDR x0, =TableroComputadora
-        MOV x3, x1
-        MOV x4, x2
+        MOV x4, x1              // x1 = fila
+        MOV x5, x2              // x2 = columna
         LDR x1, =TableroDisparosJugador
-        LDR x2, =BarcosComputadora
-        MOV x5, #1
+        LDR x2, =ContadorImpactosComputadora
+        LDR x3, =EstadoBarcosComputadora
         BL f01ProcesarDisparoEnCelda
         
         // Incrementar contador de celdas

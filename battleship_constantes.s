@@ -26,6 +26,8 @@ TOTAL_CELDAS:   .quad 140   // 10 × 14
 // ============================================
 // ESTADOS DE CELDA - TABLERO PROPIO
 // ============================================
+// ESTADOS DE CELDA - TABLERO PROPIO (LEGACY - mantener compatibilidad)
+// ============================================
 .global ESTADO_VACIA, ESTADO_VACIA_IMPACTADA
 .global ESTADO_BARCO, ESTADO_BARCO_IMPACTADO
 
@@ -33,6 +35,23 @@ ESTADO_VACIA:           .quad 0  // Agua sin impactar
 ESTADO_VACIA_IMPACTADA: .quad 1  // Agua impactada por enemigo
 ESTADO_BARCO:           .quad 2  // Barco sin impactar
 ESTADO_BARCO_IMPACTADO: .quad 3  // Barco impactado
+
+// ============================================
+// NUEVA ESTRUCTURA DE CELDA [descubierto, tipo, id_barco]
+// ============================================
+.global CELDA_DESCUBIERTO_NO, CELDA_DESCUBIERTO_SI
+CELDA_DESCUBIERTO_NO:   .quad 0  // No visible (barcos IA)
+CELDA_DESCUBIERTO_SI:   .quad 1  // Visible (barcos jugador o explorado)
+
+.global CELDA_TIPO_AGUA, CELDA_TIPO_AGUA_IMPACT
+.global CELDA_TIPO_BARCO, CELDA_TIPO_BARCO_IMPACT
+CELDA_TIPO_AGUA:        .quad 0  // Agua limpia
+CELDA_TIPO_AGUA_IMPACT: .quad 1  // Agua impactada
+CELDA_TIPO_BARCO:       .quad 2  // Barco intacto
+CELDA_TIPO_BARCO_IMPACT:.quad 3  // Barco impactado
+
+.global CELDA_ID_NINGUNO
+CELDA_ID_NINGUNO:       .quad 0  // Sin barco (agua)
 
 // ============================================
 // ESTADOS DE CELDA - TABLERO ENEMIGO
@@ -78,6 +97,16 @@ TAMANO_ACORAZADO:   .quad 4
 TAMANO_DESTRUCTOR:  .quad 3
 TAMANO_SUBMARINO:   .quad 3
 TAMANO_PATRULLERO:  .quad 2
+
+// Array de tamaños indexado por ID [0, 5, 4, 3, 3, 2]
+.global TamanosPorID
+TamanosPorID:
+    .quad 0  // ID 0: ninguno
+    .quad 5  // ID 1: Portaviones
+    .quad 4  // ID 2: Acorazado
+    .quad 3  // ID 3: Destructor
+    .quad 3  // ID 4: Submarino
+    .quad 2  // ID 5: Patrullero
 
 // ============================================
 // TIPOS DE MISILES

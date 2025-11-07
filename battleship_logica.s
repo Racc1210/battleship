@@ -36,6 +36,7 @@
 .extern f03ImprimirTableroEnemigo
 .extern f04ImprimirAmbosTableros
 .extern BarcosJugador, BarcosComputadora
+.extern EstadoBarcosJugador, EstadoBarcosComputadora
 .extern MensajePresionarEnter, LargoMensajePresionarEnterVal
 .extern MensajeTurnoJugador, LargoMensajeTurnoJugadorVal
 .extern MensajeTurnoEnemigo, LargoMensajeTurnoEnemigoVal
@@ -259,12 +260,12 @@ f04VerificarFinDeJuego:
         mov x29, sp
         
         // Contar barcos hundidos del jugador
-        LDR x0, =BarcosJugador
+        LDR x0, =EstadoBarcosJugador
         BL f04ContarBarcosHundidos
         STR x0, [sp, #16]       // Guardar barcos hundidos del jugador
         
         // Contar barcos hundidos de la computadora
-        LDR x0, =BarcosComputadora
+        LDR x0, =EstadoBarcosComputadora
         BL f04ContarBarcosHundidos
         STR x0, [sp, #24]       // Guardar barcos hundidos de la IA
         

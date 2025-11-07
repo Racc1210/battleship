@@ -262,7 +262,7 @@ f02solicitar_coordenadas:
         
         // Guardar popa
         STR x0, [sp, #56]       // Fila popa
-        STR x1, [sp, #24]       // Columna popa (reutilizamos slot)
+        STR x1, [sp, #24]       // Columna popa (reutilizamos slot que tenía tipo)
         
         // Validar orientación (horizontal o vertical, no diagonal)
         LDR x0, [sp, #40]       // Fila proa
@@ -293,33 +293,8 @@ f02solicitar_coordenadas:
         BEQ f02error_solapamiento
         
         // Todas las validaciones pasaron, colocar barco
-        LDR x0, [sp, #16]       // Índice
-        LDR x1, [sp, #24]       // Tipo (recuperar original)
-        LDR x1, [sp, #24]       // Columna popa (corregir)
-        LDR x2, [sp, #32]       // Tamaño
-        LDR x3, [sp, #40]       // Fila proa
-        LDR x4, [sp, #48]       // Columna proa
-        LDR x5, [sp, #56]       // Fila popa
-        LDR x6, [sp, #24]       // Columna popa
-        
-        // Recargar parámetros correctamente
-        LDR x0, [sp, #16]       // Índice
-        LDR x1, [sp, #24]       // Tipo (del stack original)
-        LDR x2, [sp, #32]       // Tamaño
-        LDR x3, [sp, #40]       // Fila proa
-        LDR x4, [sp, #48]       // Columna proa
-        LDR x5, [sp, #56]       // Fila popa
-        LDR x6, [sp, #24]       // Columna popa
-        
-        // Corrección: recuperar tipo original
-        LDR x1, [sp, #24]
-        STR x1, [sp, #24]       // Guardar columna popa
-        
-        // Reorganizar para f07ColocarBarcoEnTablero
-        LDR x0, [sp, #16]       // Índice
-        LDR x1, [sp, #24]       // Necesitamos recargar tipo
-        
-        // Llamar a función de colocación
+        // Parámetros para f07ColocarBarcoEnTablero:
+        // x0=índice, x1=fila_proa, x2=col_proa, x3=fila_popa, x4=col_popa, x5=tamaño
         LDR x0, [sp, #16]       // Índice del barco
         LDR x1, [sp, #40]       // Fila proa
         LDR x2, [sp, #48]       // Columna proa

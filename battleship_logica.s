@@ -25,6 +25,7 @@
 
 // Dependencias externas
 .extern f01ImprimirCadena
+.extern f02LeerCadena
 .extern f05LimpiarPantalla
 .extern f01InicializarTableros
 .extern f01ColocarTodosBarcosJugador
@@ -33,10 +34,12 @@
 .extern f02SeleccionarYLanzarMisil
 .extern f02TurnoIA
 .extern f04ContarBarcosHundidos
+.extern DEBUG_ImprimirTableroEnemigo
 .extern f03ImprimirTableroEnemigo
 .extern f04ImprimirAmbosTableros
 .extern BarcosJugador, BarcosComputadora
 .extern EstadoBarcosJugador, EstadoBarcosComputadora
+.extern BufferLectura
 .extern MensajePresionarEnter, LargoMensajePresionarEnterVal
 .extern MensajeTurnoJugador, LargoMensajeTurnoJugadorVal
 .extern MensajeTurnoEnemigo, LargoMensajeTurnoEnemigoVal
@@ -85,6 +88,18 @@ f01FasePreparacion:
         
         // Colocar barcos de la IA
         BL f09ColocarBarcosIACompleto
+        
+        // [DEBUG TEMPORAL] Mostrar tablero enemigo con barcos revelados
+        BL DEBUG_ImprimirTableroEnemigo
+        
+        // Esperar ENTER para continuar
+        LDR x1, =MensajePresionarEnter
+        LDR x2, =LargoMensajePresionarEnterVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        LDR x1, =BufferLectura
+        MOV x2, #10
+        BL f02LeerCadena
         
         // Inicializar estado de la IA
         BL f01InicializarIA

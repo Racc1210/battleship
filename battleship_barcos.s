@@ -987,6 +987,118 @@ f10InicializarMunicion:
         RET
 
 
+// ******  Nombre  ***********************************
+// DEBUG_ImprimirTableroEnemigo
+// ******  Descripción  ******************************
+// FUNCIÓN TEMPORAL DE DEBUG: Imprime el tablero 
+// enemigo con todos los barcos revelados para 
+// verificar la colocación de barcos de la IA.
+// ******  Retorno  **********************************
+// Ninguno
+// ******  Entradas  *********************************
+// Ninguna
+// ******  Errores  **********************************
+// Ninguno
+// ***************************************************
+.global DEBUG_ImprimirTableroEnemigo
+DEBUG_ImprimirTableroEnemigo:
+        stp x29, x30, [sp, -64]!
+        mov x29, sp
+        
+        // Imprimir encabezado
+        LDR x1, =MensajeDebugTablero
+        MOV x2, #40
+        BL f01ImprimirCadena
+        
+        // Imprimir números de columna
+        LDR x1, =EncabezadoColumnas
+        MOV x2, #50
+        BL f01ImprimirCadena
+        
+        // Imprimir cada fila
+        MOV x19, #0             // x19 = fila actual
+        
+DEBUG_loop_filas:
+        CMP x19, #10
+        BGE DEBUG_fin
+        
+        // Imprimir letra de fila
+        ADD x0, x19, #'A'
+        STRB w0, [sp, #16]
+        MOV x1, sp
+        ADD x1, x1, #16
+        MOV x2, #1
+        BL f01ImprimirCadena
+        
+        // Espacio
+        LDR x1, =Espacio
+        MOV x2, #1
+        BL f01ImprimirCadena
+        
+        // Imprimir cada columna
+        MOV x20, #0             // x20 = columna actual
+        
+DEBUG_loop_columnas:
+        CMP x20, #14
+        BGE DEBUG_fin_fila
+        
+        // Obtener tipo de celda (siempre revelado para debug)
+        LDR x0, =TableroComputadora
+        MOV x1, x19             // fila
+        MOV x2, x20             // columna
+        BL f16ObtenerTipo
+        
+        // Determinar qué imprimir según tipo
+        MOV x21, x0             // Guardar tipo
+        CMP x21, #2             // CELDA_TIPO_BARCO
+        BEQ DEBUG_imprimir_barco
+        
+DEBUG_imprimir_agua:
+        // Imprimir '.'
+        MOV x0, #'.'
+        STRB w0, [sp, #16]
+        MOV x1, sp
+        ADD x1, x1, #16
+        MOV x2, #1
+        BL f01ImprimirCadena
+        B DEBUG_siguiente_columna
+        
+DEBUG_imprimir_barco:
+        // Imprimir 'X' para barco
+        MOV x0, #'X'
+        STRB w0, [sp, #16]
+        MOV x1, sp
+        ADD x1, x1, #16
+        MOV x2, #1
+        BL f01ImprimirCadena
+        
+DEBUG_siguiente_columna:
+        // Espacio entre celdas
+        LDR x1, =Espacio
+        MOV x2, #1
+        BL f01ImprimirCadena
+        
+        ADD x20, x20, #1
+        B DEBUG_loop_columnas
+        
+DEBUG_fin_fila:
+        // Salto de línea
+        LDR x1, =SaltoLinea
+        MOV x2, #1
+        BL f01ImprimirCadena
+        
+        ADD x19, x19, #1
+        B DEBUG_loop_filas
+        
+DEBUG_fin:
+        LDR x1, =SaltoLinea
+        MOV x2, #1
+        BL f01ImprimirCadena
+        
+        ldp x29, x30, [sp], 64
+        RET
+
+
 // ============================================
 // FIN DEL ARCHIVO
 // ============================================

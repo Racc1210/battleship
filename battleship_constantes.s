@@ -226,10 +226,17 @@ ColorAmarillo: .asciz "\033[33m"
 .global DebugMsgStack4, LargoDebugMsgStack4Val
 .global DebugMsgEntry1, LargoDebugMsgEntry1Val
 .global DebugMsgEntry2, LargoDebugMsgEntry2Val
+.global MensajeDebugTablero, EncabezadoColumnas
 
 MensajeDebugRetorno:
     .asciz "[DEBUG] Retorno exitoso de lanzar misil\n"
 LargoMensajeDebugRetornoVal: .quad 41
+
+MensajeDebugTablero:
+    .asciz "\n[DEBUG] TABLERO ENEMIGO (revelado):\n"
+
+EncabezadoColumnas:
+    .asciz "    1  2  3  4  5  6  7  8  9 10 11 12 13 14\n"
 
 DebugMsgEntry1:
     .asciz "[DEBUG ENTRY] x29 al entrar: "

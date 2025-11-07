@@ -278,21 +278,48 @@ LargoMensajeBienvenidaVal: .quad 429
 .global OpcionInvalida, LargoOpcionInvalidaVal
 
 MenuPrincipal:
-    .asciz "============================================================\n                     MENU PRINCIPAL                         \n============================================================\n\n  1. JUGAR\n  2. TUTORIAL\n  3. CREDITOS\n  4. SALIR\n\n  Seleccione una opcion (1-4): "
-LargoMenuPrincipalVal: .quad 239
+    .asciz "\n============================================================\n            BATTLESHIP: ADVANCED MISSION                    \n              Version ARM64 Assembly                        \n============================================================\n\n                     MENU PRINCIPAL                         \n\n  1. JUGAR\n  2. TUTORIAL\n  3. CREDITOS\n  4. SALIR\n\n  Seleccione una opcion (1-4): "
+LargoMenuPrincipalVal: .quad 390
 
 OpcionInvalida:
-    .asciz "\n  [!] Opcion invalida. Por favor ingrese 1, 2, 3 o 4.\n\n"
-LargoOpcionInvalidaVal: .quad 56
+    .asciz "\n Opcion invalida. Por favor ingrese 1, 2, 3 o 4.\n\n"
+LargoOpcionInvalidaVal: .quad 51
 
 // ============================================
-// PANTALLA DE TUTORIAL
+// PANTALLA DE TUTORIAL - PÁGINA 1: INTRODUCCIÓN
 // ============================================
-.global TutorialCompleto, LargoTutorialCompletoVal
+.global TutorialPagina1, LargoTutorialPagina1Val
 
-TutorialCompleto:
-    .asciz "============================================================\n                        TUTORIAL                            \n============================================================\n\n  COMO JUGAR:\n  -----------\n  1. Coloca tus 5 barcos estrategicamente\n  2. Ingresa coordenadas de proa y popa (ej: A1 a A5)\n  3. Alterna turnos atacando al enemigo\n  4. Selecciona tipo de misil segun la situacion\n\n  COORDENADAS:\n  -----------\n  - Filas: A-J (10 filas)\n  - Columnas: 1-14 (14 columnas)\n  - Formato: [Letra][Numero] (ej: D7, J14, A1)\n\n  SIMBOLOS EN TABLERO PROPIO:\n  ---------------------------\n  ~  = Agua sin explorar\n  O  = Agua impactada por enemigo (fallo)\n  B  = Tu barco intacto\n  X  = Tu barco impactado\n\n  SIMBOLOS EN TABLERO ENEMIGO:\n  ----------------------------\n  .  = Zona sin explorar (niebla de guerra)\n  0  = Tu disparo al agua (fallo)\n  X  = Impacto confirmado en barco enemigo\n\n  BARCOS DISPONIBLES:\n  ------------------\n  - Portaviones (5): 2x Exocet\n  - Acorazado (4):   1x Tomahawk\n  - Destructor (3):  2x Apache\n  - Submarino (3):   2x Torpedo\n  - Patrullero (2):  Solo estandar\n\n  VICTORIA:\n  --------\n  Hunde los 5 barcos enemigos antes que destruyan los tuyos\n\n"
-LargoTutorialCompletoVal: .quad 1240
+TutorialPagina1:
+    .asciz "\n============================================================\n                        TUTORIAL                            \n============================================================\n\n  OBJETIVO DEL JUEGO:\n  -------------------\n  Hundir toda la flota enemiga antes de que destruyan\n  la tuya.\n\n  COMO JUGAR:\n  -----------\n  1. Coloca estrategicamente tus 5 barcos en el tablero\n  2. Ingresa coordenadas de proa y popa (ej: A1 a A5)\n  3. Alterna turnos atacando al enemigo\n  4. Selecciona el tipo de misil segun la situacion\n\n  TABLERO:\n  --------\n  - Dimensiones: 10 filas (A-J) x 14 columnas (1-14)\n  - Coordenadas: [Letra][Numero] (ejemplos: D7, J14, A1)\n\n"
+LargoTutorialPagina1Val: .quad 659
+
+// ============================================
+// TUTORIAL - PÁGINA 2: SÍMBOLOS
+// ============================================
+.global TutorialPagina2, LargoTutorialPagina2Val
+
+TutorialPagina2:
+    .asciz "\n============================================================\n                   SIMBOLOS DEL JUEGO                       \n============================================================\n\n  TABLERO PROPIO (Tu flota):\n  --------------------------\n  ~  = Agua sin explorar\n  O  = Agua impactada por enemigo (fallo)\n  B  = Tu barco intacto\n  X  = Tu barco impactado\n\n  TABLERO ENEMIGO (Flota enemiga):\n  ---------------------------------\n  .  = Zona sin explorar (niebla de guerra)\n  O  = Tu disparo al agua (fallo)\n  X  = Impacto confirmado en barco enemigo\n\n"
+LargoTutorialPagina2Val: .quad 555
+
+// ============================================
+// TUTORIAL - PÁGINA 3: BARCOS
+// ============================================
+.global TutorialPagina3, LargoTutorialPagina3Val
+
+TutorialPagina3:
+    .asciz "\n============================================================\n                    TUS EMBARCACIONES                       \n============================================================\n\n  1. PORTAVIONES (5 celdas)\n     Armamento: 2x Misiles Exocet (patron especial)\n\n  2. ACORAZADO (4 celdas)\n     Armamento: 1x Misil Tomahawk (area 3x3)\n\n  3. DESTRUCTOR (3 celdas)\n     Armamento: 2x Misiles Apache (patron especial)\n\n  4. SUBMARINO (3 celdas)\n     Armamento: 2x Torpedos (linea completa)\n\n  5. PATRULLERO (2 celdas)\n     Armamento: Solo misiles estandar\n\n"
+LargoTutorialPagina3Val: .quad 556
+
+// ============================================
+// TUTORIAL - PÁGINA 4: ARMAMENTO
+// ============================================
+.global TutorialPagina4, LargoTutorialPagina4Val
+
+TutorialPagina4:
+    .asciz "\n============================================================\n                   TIPOS DE ARMAMENTO                       \n============================================================\n\n  MISIL ESTANDAR\n    Alcance: 1 celda | Municion: ILIMITADA\n    Disponible en todos los barcos\n\n  MISIL EXOCET (Portaviones)\n    Alcance: Patron de 5 celdas (+ o X)\n    Municion: 2 disparos\n\n  MISIL TOMAHAWK (Acorazado)\n    Alcance: Area 3x3 (9 celdas)\n    Municion: 1 disparo - Bombardeo masivo\n\n  MISIL APACHE (Destructor)\n    Alcance: Patron de 3-4 celdas (H o V)\n    Municion: 2 disparos\n\n  TORPEDO (Submarino)\n    Alcance: Linea completa desde el borde\n    Municion: 2 disparos (N, S, E, O)\n\n  NOTA: Los misiles especiales son limitados!\n        Usalos estrategicamente.\n\n"
+LargoTutorialPagina4Val: .quad 762
 
 // ============================================
 // PANTALLA DE FIN DE JUEGO
@@ -303,15 +330,15 @@ LargoTutorialCompletoVal: .quad 1240
 
 MensajeVictoriaFinal:
     .asciz "\n============================================================\n                                                            \n               ****  VICTORIA  ****                         \n                                                            \n     Has hundido toda la flota enemiga!                    \n     Felicitaciones, Comandante!                            \n                                                            \n============================================================\n\n"
-LargoMensajeVictoriaFinalVal: .quad 440
+LargoMensajeVictoriaFinalVal: .quad 489
 
 MensajeDerrotaFinal:
     .asciz "\n============================================================\n                                                            \n               ****  DERROTA  ****                          \n                                                            \n     Tu flota ha sido completamente destruida              \n     El enemigo ha ganado esta batalla...                  \n                                                            \n============================================================\n\n"
-LargoMensajeDerrotaFinalVal: .quad 438
+LargoMensajeDerrotaFinalVal: .quad 488
 
 MenuFinJuego:
-    .asciz "  Que desea hacer?\n\n  1. Jugar de nuevo\n  2. Volver al menu principal\n  3. Salir del juego\n\n  Seleccione una opcion (1-3): "
-LargoMenuFinJuegoVal: .quad 139
+    .asciz "  1. Jugar de nuevo\n  2. Volver al menu principal\n  3. Salir del juego\n\n  Seleccione una opcion (1-3): "
+LargoMenuFinJuegoVal: .quad 103
 
 // ============================================
 // MENSAJE DE CRÉDITOS
@@ -319,8 +346,8 @@ LargoMenuFinJuegoVal: .quad 139
 .global MensajeCreditos, LargoMensajeCreditosVal
 
 MensajeCreditos:
-    .asciz "    Desarrollado por: Roymar Castillo\n    Institucion: Instituto Tecnologico de Costa Rica\n    Proyecto: Programacion en Bajo Nivel - ARM64\n    Ano: 2025\n\n"
-LargoMensajeCreditosVal: .quad 155
+    .asciz "\n============================================================\n    Desarrollado por: Roymar Castillo\n    Institucion: Instituto Tecnologico de Costa Rica\n    Proyecto 3 - Battleship\n    Ano: 2025\n\n    Arquitectura de software\n      \n============================================================\n\n"
+LargoMensajeCreditosVal: .quad 294
 
 // ============================================
 // MENSAJE DE INSTRUCCIONES GENERALES

@@ -29,7 +29,10 @@
 .extern MensajeBienvenida, LargoMensajeBienvenidaVal
 .extern MenuPrincipal, LargoMenuPrincipalVal
 .extern OpcionInvalida, LargoOpcionInvalidaVal
-.extern TutorialCompleto, LargoTutorialCompletoVal
+.extern TutorialPagina1, LargoTutorialPagina1Val
+.extern TutorialPagina2, LargoTutorialPagina2Val
+.extern TutorialPagina3, LargoTutorialPagina3Val
+.extern TutorialPagina4, LargoTutorialPagina4Val
 .extern MensajeCreditos, LargoMensajeCreditosVal
 .extern MensajeDespedida, LargoMensajeDespedidaVal
 .extern MensajePresionarEnter, LargoMensajePresionarEnterVal
@@ -57,10 +60,7 @@ _start:
         // Inicializar semilla aleatoria (una sola vez)
         BL f13InicializarSemilla
         
-        // Mostrar bienvenida inicial solo una vez
-        BL MostrarBienvenidaInicial
-        
-        // Loop principal del menú
+        // Loop principal del menú (mostrar directamente)
 MenuLoop:
         BL f05LimpiarPantalla
         BL MostrarMenuPrincipal
@@ -124,10 +124,11 @@ OpcionJugar:
 // OPCIÓN 2: TUTORIAL
 // ============================================
 OpcionTutorial:
+        // Página 1: Introducción
         BL f05LimpiarPantalla
         
-        LDR x1, =TutorialCompleto
-        LDR x2, =LargoTutorialCompletoVal
+        LDR x1, =TutorialPagina1
+        LDR x2, =LargoTutorialPagina1Val
         LDR x2, [x2]
         BL f01ImprimirCadena
         
@@ -137,6 +138,49 @@ OpcionTutorial:
         BL f01ImprimirCadena
         BL EsperarEnter
         
+        // Página 2: Símbolos
+        BL f05LimpiarPantalla
+        
+        LDR x1, =TutorialPagina2
+        LDR x2, =LargoTutorialPagina2Val
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
+        LDR x1, =MensajePresionarEnter
+        LDR x2, =LargoMensajePresionarEnterVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        BL EsperarEnter
+        
+        // Página 3: Barcos
+        BL f05LimpiarPantalla
+        
+        LDR x1, =TutorialPagina3
+        LDR x2, =LargoTutorialPagina3Val
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
+        LDR x1, =MensajePresionarEnter
+        LDR x2, =LargoMensajePresionarEnterVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        BL EsperarEnter
+        
+        // Página 4: Armamento
+        BL f05LimpiarPantalla
+        
+        LDR x1, =TutorialPagina4
+        LDR x2, =LargoTutorialPagina4Val
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
+        LDR x1, =MensajePresionarEnter
+        LDR x2, =LargoMensajePresionarEnterVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        BL EsperarEnter
+        
+        // Volver al menú principal
         B MenuLoop
 
 // ============================================
@@ -184,32 +228,6 @@ OpcionSalir:
 // ============================================
 // FUNCIONES AUXILIARES
 // ============================================
-
-// Mostrar bienvenida inicial (solo una vez al inicio)
-MostrarBienvenidaInicial:
-        stp x29, x30, [sp, -16]!
-        mov x29, sp
-        
-        BL f05LimpiarPantalla
-        
-        LDR x1, =MensajeBienvenida
-        LDR x2, =LargoMensajeBienvenidaVal
-        LDR x2, [x2]
-        BL f01ImprimirCadena
-        
-        LDR x1, =MensajeCreditos
-        LDR x2, =LargoMensajeCreditosVal
-        LDR x2, [x2]
-        BL f01ImprimirCadena
-        
-        LDR x1, =MensajePresionarEnter
-        LDR x2, =LargoMensajePresionarEnterVal
-        LDR x2, [x2]
-        BL f01ImprimirCadena
-        BL EsperarEnter
-        
-        ldp x29, x30, [sp], 16
-        RET
 
 // Mostrar menú principal
 MostrarMenuPrincipal:

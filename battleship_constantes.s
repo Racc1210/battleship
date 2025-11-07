@@ -56,6 +56,18 @@ TIPO_PATRULLERO:  .quad 4  // Patrol Boat - 2 celdas
 NUM_BARCOS:       .quad 5  // Total de barcos por jugador
 
 // ============================================
+// IDs DE EMBARCACIONES (para tracking)
+// ============================================
+.global ID_PORTAVIONES, ID_ACORAZADO, ID_DESTRUCTOR
+.global ID_SUBMARINO, ID_PATRULLERO
+
+ID_PORTAVIONES: .quad 1  // ID único para Portaviones
+ID_ACORAZADO:   .quad 2  // ID único para Acorazado
+ID_DESTRUCTOR:  .quad 3  // ID único para Destructor
+ID_SUBMARINO:   .quad 4  // ID único para Submarino
+ID_PATRULLERO:  .quad 5  // ID único para Patrullero
+
+// ============================================
 // TAMAÑOS DE EMBARCACIONES
 // ============================================
 .global TAMANO_PORTAVIONES, TAMANO_ACORAZADO, TAMANO_DESTRUCTOR
@@ -488,7 +500,17 @@ LargoMensajeImpactoVal: .quad 53
 
 MensajeHundido:
     .asciz "\n\033[32m BARCO HUNDIDO!\033[0m Has destruido una embarcacion enemiga\n"
-LargoMensajeHundidoVal: .quad 67
+LargoMensajeHundidoVal: .quad 66
+
+// Nombres de barcos para mensajes detallados
+.global NombrePortaviones, NombreAcorazado, NombreDestructor
+.global NombreSubmarino, NombrePatrullero
+
+NombrePortaviones: .asciz "PORTAVIONES"
+NombreAcorazado:   .asciz "ACORAZADO"
+NombreDestructor:  .asciz "DESTRUCTOR"
+NombreSubmarino:   .asciz "SUBMARINO"
+NombrePatrullero:  .asciz "PATRULLERO"
 
 MensajeDisparoRepetido:
     .asciz "\n Ya has disparado a esta coordenada anteriormente\n"

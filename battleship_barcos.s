@@ -81,7 +81,8 @@
 //   +6:  Orientación (1 byte)
 //   +7:  Impactos recibidos (1 byte)
 //   +8:  Estado (1 byte): 0=activo, 1=hundido
-//   +9-39: Reservado
+//   +9:  ID del barco (1 byte): 1=Portaviones, 2=Acorazado, 3=Destructor, 4=Submarino, 5=Patrullero
+//   +10-39: Reservado
 
 BarcosJugador:      .skip 200  // 5 barcos × 40 bytes
 BarcosComputadora:  .skip 200
@@ -725,6 +726,11 @@ f07guardar_estructura:
         MOV w1, #0
         STRB w1, [x10, #7]      // Impactos = 0
         STRB w1, [x10, #8]      // Estado = activo
+        
+        // Asignar ID del barco (índice + 1)
+        LDR x1, [sp, #16]       // Índice del barco (0-4)
+        ADD w1, w1, #1          // ID = índice + 1 (1-5)
+        STRB w1, [x10, #9]      // ID del barco
         
         ldp x29, x30, [sp], 80
         RET

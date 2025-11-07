@@ -1,0 +1,36 @@
+Resumen de cambios implementados - Sistema Híbrido de Identificación de Barcos
+==================================================================================
+
+1. ESTRUCTURA DE BARCOS ACTUALIZADA (40 bytes):
+   +0:  Tipo (1 byte)
+   +1:  Tamaño (1 byte)  
+   +2-5: Coordenadas (4 bytes)
+   +6:  Orientación (1 byte)
+   +7:  Impactos (1 byte)
+   +8:  Estado (1 byte)
+   +9:  ID del barco (1 byte) ← NUEVO
+   +10-39: Reservado
+
+2. CONSTANTES AGREGADAS (battleship_constantes.s):
+   ID_PORTAVIONES: .quad 1
+   ID_ACORAZADO:   .quad 2
+   ID_DESTRUCTOR:  .quad 3
+   ID_SUBMARINO:   .quad 4
+   ID_PATRULLERO:  .quad 5
+
+   Nombres de barcos:
+   - NombrePortaviones: "PORTAVIONES"
+   - NombreAcorazado:   "ACORAZADO"
+   - NombreDestructor:  "DESTRUCTOR"
+   - NombreSubmarino:   "SUBMARINO"
+   - NombrePatrullero:  "PATRULLERO"
+
+3. MODIFICACIONES EN CÓDIGO:
+   ✅ battleship_barcos.s - f07ColocarBarcoEnTablero:
+      - Línea 733: Asigna ID = índice + 1 al guardar barco
+
+4. PRÓXIMOS PASOS:
+   - Agregar función f14ObtenerNombreBarco(id) → devuelve dirección del nombre
+   - Modificar f03VerificarBarcoHundido para leer ID y mostrar nombre
+   - Implementar mensajes como: "BARCO HUNDIDO! Has destruido el ACORAZADO enemigo"
+   - Completar f09ColocarBarcoAleatorio para IA

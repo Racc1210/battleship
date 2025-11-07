@@ -85,6 +85,7 @@
 .extern DebugMsgEntry1, LargoDebugMsgEntry1Val
 .extern DebugMsgEntry2, LargoDebugMsgEntry2Val
 .extern SaltoLinea
+.extern f14ObtenerNombreBarco
 
 .section .bss
 BufferMunicion: .skip 8
@@ -351,8 +352,9 @@ f03solicitar_coord:
         MOV x5, #1              // Es jugador
         BL f01ProcesarDisparoEnCelda
         
-        // x0 tiene el resultado - guardarlo
+        // x0 tiene el resultado, x1 tiene el ID del barco (si hundido)
         STR x0, [sp, #32]       // Resultado
+        STR x1, [sp, #40]       // ID del barco (si aplicable)
         
         // Registrar último ataque para highlighting
         LDR x0, [sp, #16]       // Fila
@@ -389,10 +391,25 @@ f03resultado_impacto:
         RET
 
 f03resultado_hundido:
+        // Mensaje base de hundimiento
         LDR x1, =MensajeHundido
         LDR x2, =LargoMensajeHundidoVal
         LDR x2, [x2]
         BL f01ImprimirCadena
+        
+        // Obtener y mostrar nombre del barco
+        LDR x0, [sp, #40]       // ID del barco
+        BL f14ObtenerNombreBarco
+        // x0 = dirección nombre, x1 = longitud
+        MOV x2, x1              // longitud
+        MOV x1, x0              // dirección
+        BL f01ImprimirCadena
+        
+        // Salto de línea
+        LDR x1, =SaltoLinea
+        MOV x2, #1
+        BL f01ImprimirCadena
+        
         MOV x0, #2
         ldp x29, x30, [sp], 80
         RET
@@ -433,11 +450,44 @@ f04LanzarMisilExocet:
         LDR x1, [sp, #24]       // Fila
         LDR x2, [sp, #32]       // Columna
         BL f08AplicarPatron
+        STR x0, [sp, #40]       // Guardar resultado
         
         // Decrementar munición Exocet
         MOV x0, #0              // Índice Exocet
         BL f13DecrementarMunicion
         
+        // Mostrar mensaje según resultado
+        LDR x0, [sp, #40]
+        CMP x0, #0
+        BEQ f04resultado_agua_exocet
+        CMP x0, #1
+        BEQ f04resultado_impacto_exocet
+        CMP x0, #2
+        BEQ f04resultado_hundido_exocet
+        B f04salir_exocet
+
+f04resultado_agua_exocet:
+        LDR x1, =MensajeAgua
+        LDR x2, =LargoMensajeAguaVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        B f04salir_exocet
+
+f04resultado_impacto_exocet:
+        LDR x1, =MensajeImpacto
+        LDR x2, =LargoMensajeImpactoVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        B f04salir_exocet
+
+f04resultado_hundido_exocet:
+        LDR x1, =MensajeHundido
+        LDR x2, =LargoMensajeHundidoVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+
+f04salir_exocet:
+        LDR x0, [sp, #40]
         ldp x29, x30, [sp], 48
         RET
 
@@ -472,11 +522,44 @@ f05LanzarMisilTomahawk:
         LDR x1, [sp, #16]
         LDR x2, [sp, #24]
         BL f08AplicarPatron
+        STR x0, [sp, #32]       // Guardar resultado
         
         // Decrementar munición
         MOV x0, #1              // Índice Tomahawk
         BL f13DecrementarMunicion
         
+        // Mostrar mensaje según resultado
+        LDR x0, [sp, #32]
+        CMP x0, #0
+        BEQ f05resultado_agua_tomahawk
+        CMP x0, #1
+        BEQ f05resultado_impacto_tomahawk
+        CMP x0, #2
+        BEQ f05resultado_hundido_tomahawk
+        B f05salir_tomahawk
+
+f05resultado_agua_tomahawk:
+        LDR x1, =MensajeAgua
+        LDR x2, =LargoMensajeAguaVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        B f05salir_tomahawk
+
+f05resultado_impacto_tomahawk:
+        LDR x1, =MensajeImpacto
+        LDR x2, =LargoMensajeImpactoVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        B f05salir_tomahawk
+
+f05resultado_hundido_tomahawk:
+        LDR x1, =MensajeHundido
+        LDR x2, =LargoMensajeHundidoVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+
+f05salir_tomahawk:
+        LDR x0, [sp, #32]
         ldp x29, x30, [sp], 48
         RET
 
@@ -515,11 +598,44 @@ f06LanzarMisilApache:
         LDR x1, [sp, #24]
         LDR x2, [sp, #32]
         BL f08AplicarPatron
+        STR x0, [sp, #40]       // Guardar resultado
         
         // Decrementar munición
         MOV x0, #2              // Índice Apache
         BL f13DecrementarMunicion
         
+        // Mostrar mensaje según resultado
+        LDR x0, [sp, #40]
+        CMP x0, #0
+        BEQ f06resultado_agua_apache
+        CMP x0, #1
+        BEQ f06resultado_impacto_apache
+        CMP x0, #2
+        BEQ f06resultado_hundido_apache
+        B f06salir_apache
+
+f06resultado_agua_apache:
+        LDR x1, =MensajeAgua
+        LDR x2, =LargoMensajeAguaVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        B f06salir_apache
+
+f06resultado_impacto_apache:
+        LDR x1, =MensajeImpacto
+        LDR x2, =LargoMensajeImpactoVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        B f06salir_apache
+
+f06resultado_hundido_apache:
+        LDR x1, =MensajeHundido
+        LDR x2, =LargoMensajeHundidoVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+
+f06salir_apache:
+        LDR x0, [sp, #40]
         ldp x29, x30, [sp], 48
         RET
 
@@ -644,6 +760,37 @@ f07fin_torpedo:
         MOV x0, #3              // Índice Torpedo
         BL f13DecrementarMunicion
         
+        // Recuperar resultado y mostrar mensaje
+        LDR x0, [sp, #40]
+        CMP x0, #0
+        BEQ f07resultado_agua_torpedo
+        CMP x0, #1
+        BEQ f07resultado_impacto_torpedo
+        CMP x0, #2
+        BEQ f07resultado_hundido_torpedo
+        B f07salir_torpedo
+
+f07resultado_agua_torpedo:
+        LDR x1, =MensajeAgua
+        LDR x2, =LargoMensajeAguaVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        B f07salir_torpedo
+
+f07resultado_impacto_torpedo:
+        LDR x1, =MensajeImpacto
+        LDR x2, =LargoMensajeImpactoVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        B f07salir_torpedo
+
+f07resultado_hundido_torpedo:
+        LDR x1, =MensajeHundido
+        LDR x2, =LargoMensajeHundidoVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+
+f07salir_torpedo:
         LDR x0, [sp, #40]
         ldp x29, x30, [sp], 480
         RET

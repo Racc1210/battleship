@@ -22,6 +22,7 @@
 .global f04ContarBarcosHundidos
 .global f05IncrementarImpactosBarco
 .global f06ObtenerBarcoEnCelda
+.global f14ObtenerNombreBarco
 
 // Dependencias externas
 .extern f01ImprimirCadena
@@ -37,6 +38,8 @@
 .extern BARCO_ACTIVO, BARCO_HUNDIDO
 .extern NUM_BARCOS
 .extern MensajeDebugTamano, MensajeDebugImpactos, SaltoLinea
+.extern NombrePortaviones, NombreAcorazado, NombreDestructor
+.extern NombreSubmarino, NombrePatrullero
 
 .section .text
 
@@ -173,8 +176,16 @@ f01es_barco:
         RET
 
 f01barco_hundido:
-        MOV x0, #2              // Resultado: HUNDIDO
+        // Obtener ID del barco hundido
+        LDR x0, [sp, #32]       // Array de barcos
         LDR x1, [sp, #72]       // Índice del barco
+        MOV x2, #40
+        MUL x1, x1, x2
+        ADD x0, x0, x1          // Dirección del barco
+        LDRB w1, [x0, #9]       // Leer ID del barco (offset +9)
+        
+        MOV x0, #2              // Resultado: HUNDIDO
+        // x1 ya tiene el ID del barco
         ldp x29, x30, [sp], 80
         RET
 
@@ -320,34 +331,35 @@ f05IncrementarImpactosBarco:
 // Ninguno
 // ***************************************************
 f03VerificarBarcoHundido:
-        stp x29, x30, [sp, -32]!
+        stp x29, x30, [sp, -48]!
         mov x29, sp
         
-        // Guardar parámetros para debug
-        STR x0, [sp, #16]
-        STR x1, [sp, #24]
+        // Guardar parámetros originales
+        STR x0, [sp, #16]       // Array de barcos
+        STR x1, [sp, #24]       // Índice del barco
         
         // Calcular dirección del barco
         MOV x2, #40
         MUL x1, x1, x2
         ADD x0, x0, x1
+        STR x0, [sp, #32]       // Guardar dirección calculada
         
         // Leer tamaño e impactos
         LDRB w1, [x0, #1]       // Tamaño
         LDRB w2, [x0, #7]       // Impactos
         
         // === DEBUG: Imprimir valores ===
-        STR x0, [sp, #16]       // Guardar dirección
-        STR x1, [sp, #24]       // Guardar tamaño (word, no overlap)
-        STR x2, [sp, #32]       // Guardar impactos (word, offset correcto)
+        // Guardar w1 y w2 ANTES de imprimir
+        UXTB w3, w1             // Extender tamaño a 32 bits limpio
+        UXTB w4, w2             // Extender impactos a 32 bits limpio
+        STR x3, [sp, #40]       // Guardar tamaño (no sobrescribe nada)
         
         // Imprimir tamaño
         LDR x1, =MensajeDebugTamano
         MOV x2, #9
         BL f01ImprimirCadena
         
-        LDR x0, [sp, #24]       // Tamaño
-        AND x0, x0, #0xFF       // Máscara para 1 byte
+        LDR x0, [sp, #40]       // Tamaño guardado
         BL f11ImprimirNumero
         
         // Imprimir impactos
@@ -355,14 +367,13 @@ f03VerificarBarcoHundido:
         MOV x2, #11
         BL f01ImprimirCadena
         
-        LDR x0, [sp, #32]       // Impactos
-        AND x0, x0, #0xFF       // Máscara para 1 byte
+        MOV x0, x4              // Impactos que guardamos en w4
         BL f11ImprimirNumero
         
-        // Recuperar valores originales para comparación
-        LDR x0, [sp, #16]       // Dirección
-        LDRB w1, [x0, #1]       // Re-leer tamaño desde estructura
-        LDRB w2, [x0, #7]       // Re-leer impactos desde estructura
+        // Recuperar dirección del barco
+        LDR x0, [sp, #32]
+        LDRB w1, [x0, #1]       // Re-leer tamaño
+        LDRB w2, [x0, #7]       // Re-leer impactos
         // === FIN DEBUG ===
         
         // Comparar impactos con tamaño
@@ -374,12 +385,12 @@ f03VerificarBarcoHundido:
         STRB w3, [x0, #8]
         
         MOV x0, #1              // Hundido
-        ldp x29, x30, [sp], 32
+        ldp x29, x30, [sp], 48
         RET
 
 f03aun_activo:
         MOV x0, #0              // Aún activo
-        ldp x29, x30, [sp], 32
+        ldp x29, x30, [sp], 48
         RET
 
 
@@ -453,6 +464,62 @@ f02ActualizarTableroDisparos:
         BL f07ActualizarCelda
         
         ldp x29, x30, [sp], 16
+        RET
+
+
+// ******  Nombre  ***********************************
+// f14ObtenerNombreBarco
+// ******  Descripción  ******************************
+// Devuelve la dirección del nombre del barco basado
+// en su ID.
+// ******  Retorno  **********************************
+// x0: Dirección del string con el nombre
+// x1: Longitud del nombre
+// ******  Entradas  *********************************
+// x0: ID del barco (1-5)
+// ******  Errores  **********************************
+// Si ID inválido, retorna nombre "DESCONOCIDO"
+// ***************************************************
+f14ObtenerNombreBarco:
+        CMP x0, #1
+        BEQ f14portaviones
+        CMP x0, #2
+        BEQ f14acorazado
+        CMP x0, #3
+        BEQ f14destructor
+        CMP x0, #4
+        BEQ f14submarino
+        CMP x0, #5
+        BEQ f14patrullero
+        
+        // ID inválido - retornar algo por defecto
+        LDR x0, =NombrePortaviones
+        MOV x1, #11
+        RET
+
+f14portaviones:
+        LDR x0, =NombrePortaviones
+        MOV x1, #11  // "PORTAVIONES" = 11 chars
+        RET
+
+f14acorazado:
+        LDR x0, =NombreAcorazado
+        MOV x1, #9   // "ACORAZADO" = 9 chars
+        RET
+
+f14destructor:
+        LDR x0, =NombreDestructor
+        MOV x1, #10  // "DESTRUCTOR" = 10 chars
+        RET
+
+f14submarino:
+        LDR x0, =NombreSubmarino
+        MOV x1, #9   // "SUBMARINO" = 9 chars
+        RET
+
+f14patrullero:
+        LDR x0, =NombrePatrullero
+        MOV x1, #10  // "PATRULLERO" = 10 chars
         RET
 
 

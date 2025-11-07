@@ -253,18 +253,6 @@ f01loop_est_c:
         
 f01fin:
         ldp x29, x30, [sp], 32
-        RET        LDR x2, [x2]
-        
-f01loop_disparos_c:
-        CMP x2, #0
-        BLE f01fin
-        STR x1, [x0]
-        ADD x0, x0, #8
-        SUB x2, x2, #1
-        B f01loop_disparos_c
-        
-f01fin:
-        ldp x29, x30, [sp], 16
         RET
 
 

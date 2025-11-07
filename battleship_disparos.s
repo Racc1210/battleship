@@ -338,8 +338,14 @@ f03VerificarBarcoHundido:
         
         // === DEBUG: Imprimir valores ===
         STR x0, [sp, #16]       // Guardar dirección
-        STR x1, [sp, #24]       // Guardar tamaño
-        STR x2, [sp, #28]       // Guardar impactos
+        
+        // Extender valores de byte a 64 bits antes de guardar
+        UXTB w1, w1             // Limpiar bits altos de w1
+        UXTB w2, w2             // Limpiar bits altos de w2
+        MOV x3, x1              // Copiar a registro de 64 bits
+        MOV x4, x2
+        STR x3, [sp, #24]       // Guardar tamaño (64 bits)
+        STR x4, [sp, #28]       // Guardar impactos (64 bits)
         
         // Imprimir tamaño
         LDR x1, =MensajeDebugTamano
@@ -365,13 +371,13 @@ f03VerificarBarcoHundido:
         MOV x2, #1
         BL f01ImprimirCadena
         
-        // Recuperar valores
+        // Recuperar valores originales para comparación
         LDR x0, [sp, #16]       // Dirección
-        LDR x1, [sp, #24]       // Tamaño
-        LDR x2, [sp, #28]       // Impactos
+        LDRB w1, [x0, #1]       // Re-leer tamaño desde estructura
+        LDRB w2, [x0, #7]       // Re-leer impactos desde estructura
         // === FIN DEBUG ===
         
-        // Comparar
+        // Comparar impactos con tamaño
         CMP w2, w1
         BLT f03aun_activo
         

@@ -566,33 +566,7 @@ f07iniciar_torpedo:
         ADD x24, sp, #80        // Dirección del buffer de celdas (400 bytes desde sp+80)
         
 f07recorrer_torpedo:
-        // Avanzar según dirección
-        CMP x21, #0             // Norte (viene desde arriba → avanza hacia abajo)
-        BEQ f07avanzar_norte
-        CMP x21, #1             // Sur (viene desde abajo → avanza hacia arriba)
-        BEQ f07avanzar_sur
-        CMP x21, #2             // Este (viene desde derecha → avanza hacia izquierda)
-        BEQ f07avanzar_este
-        CMP x21, #3             // Oeste (viene desde izquierda → avanza hacia derecha)
-        BEQ f07avanzar_oeste
-        
-f07avanzar_norte:
-        ADD x19, x19, #1        // Norte: incrementar fila (A→B→C...)
-        B f07verificar_celda
-
-f07avanzar_sur:
-        SUB x19, x19, #1        // Sur: decrementar fila (J→I→H...)
-        B f07verificar_celda
-
-f07avanzar_este:
-        SUB x20, x20, #1        // Este: decrementar columna (14→13→12...)
-        B f07verificar_celda
-
-f07avanzar_oeste:
-        ADD x20, x20, #1        // Oeste: incrementar columna (1→2→3...)
-
-f07verificar_celda:
-        // Verificar límites del tablero 10x14 (filas 0-9, columnas 0-13)
+        // Verificar límites del tablero ANTES de avanzar
         CMP x19, #0
         BLT f07registrar_y_terminar
         CMP x19, #9
@@ -624,7 +598,31 @@ f07verificar_celda:
         CMP x0, #0
         BGT f07impacto_torpedo
         
-        // Continuar recorrido
+        // Avanzar según dirección
+        CMP x21, #0             // Norte (viene desde arriba → avanza hacia abajo)
+        BEQ f07avanzar_norte
+        CMP x21, #1             // Sur (viene desde abajo → avanza hacia arriba)
+        BEQ f07avanzar_sur
+        CMP x21, #2             // Este (viene desde derecha → avanza hacia izquierda)
+        BEQ f07avanzar_este
+        CMP x21, #3             // Oeste (viene desde izquierda → avanza hacia derecha)
+        BEQ f07avanzar_oeste
+        B f07recorrer_torpedo   // No debería llegar aquí
+        
+f07avanzar_norte:
+        ADD x19, x19, #1        // Norte: incrementar fila (A→B→C...)
+        B f07recorrer_torpedo
+
+f07avanzar_sur:
+        SUB x19, x19, #1        // Sur: decrementar fila (J→I→H...)
+        B f07recorrer_torpedo
+
+f07avanzar_este:
+        SUB x20, x20, #1        // Este: decrementar columna (14→13→12...)
+        B f07recorrer_torpedo
+
+f07avanzar_oeste:
+        ADD x20, x20, #1        // Oeste: incrementar columna (1→2→3...)
         B f07recorrer_torpedo
 
 f07impacto_torpedo:

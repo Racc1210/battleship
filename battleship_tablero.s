@@ -44,6 +44,7 @@
 .extern SimboloAgua, SimboloAguaImpactada
 .extern SimboloBarco, SimboloBarcoImpactado
 .extern SimboloDesconocida, SimboloEnemigoAgua, SimboloEnemigoBarco
+.extern ColorRojo, ColorAmarillo, ColorReset
 .extern Espacio, SaltoLinea, Separador
 .extern TituloTableroPropio, LargoTituloTableroPropioVal
 .extern TituloTableroEnemigo, LargoTituloTableroEnemigoVal

@@ -387,7 +387,7 @@ LargoOpcionTorpedoVal: .quad 41
 
 MenuPatronExocet:
     .asciz "\n  Seleccione patron de Exocet:\n    1. Patron + (cruz)\n    2. Patron X (diagonal)\n  Opcion: "
-LargoMenuPatronExocetVal: .quad 94
+LargoMenuPatronExocetVal: .quad 92
 
 MenuPatronApache:
     .asciz "\n  Seleccione patron de Apache:\n    1. Patron horizontal\n    2. Patron vertical\n  Opcion: "
@@ -403,7 +403,7 @@ LargoMenuPatronApacheVal: .quad 90
 
 MenuDireccionTorpedo:
     .asciz "\n  Seleccione direccion del torpedo:\n    1. Norte (desde fila A hacia abajo)\n    2. Sur (desde fila J hacia arriba)\n    3. Este (desde columna 14 hacia izquierda)\n    4. Oeste (desde columna 1 hacia derecha)\n  Opcion: "
-LargoMenuDireccionTorpedoVal: .quad 191
+LargoMenuDireccionTorpedoVal: .quad 218
 
 ErrorOrigenTorpedo:
     .asciz "\n ERROR: Coordenada invalida para torpedo\n"
@@ -411,7 +411,7 @@ LargoErrorOrigenTorpedoVal: .quad 42
 
 MensajeTorpedoColumna:
     .asciz "\n  Ingrese columna (1-14): "
-LargoMensajeTorpedoColumnaVal: .quad 26
+LargoMensajeTorpedoColumnaVal: .quad 27
 
 MensajeTorpedoFila:
     .asciz "\n  Ingrese fila (A-J): "

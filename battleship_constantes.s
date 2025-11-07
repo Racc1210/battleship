@@ -484,11 +484,11 @@ LargoMensajeAguaVal: .quad 26
 
 MensajeImpacto:
     .asciz "\n\033[33m IMPACTO!\033[0m Has golpeado un barco enemigo\n"
-LargoMensajeImpactoVal: .quad 44
+LargoMensajeImpactoVal: .quad 53
 
 MensajeHundido:
     .asciz "\n\033[32m BARCO HUNDIDO!\033[0m Has destruido una embarcacion enemiga\n"
-LargoMensajeHundidoVal: .quad 58
+LargoMensajeHundidoVal: .quad 67
 
 MensajeDisparoRepetido:
     .asciz "\n Ya has disparado a esta coordenada anteriormente\n"

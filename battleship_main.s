@@ -117,7 +117,7 @@ OpcionJugar:
         BL f05MostrarResultadoFinal
         
         // Preguntar qué hacer después
-        BL MenuFinJuego
+        BL MostrarMenuFinJuego
         B MenuLoop
 
 // ============================================
@@ -255,7 +255,7 @@ EsperarEnter:
         RET
 
 // Menú de fin de juego
-MenuFinJuego:
+MostrarMenuFinJuego:
         stp x29, x30, [sp, -16]!
         mov x29, sp
         

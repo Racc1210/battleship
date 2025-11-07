@@ -29,7 +29,7 @@
 .extern f05LimpiarPantalla
 .extern f01InicializarTableros
 .extern f01ColocarTodosBarcosJugador
-.extern f09ColocarBarcosIACompleto
+.extern f08ColocarTodosBarcosIA
 .extern f01InicializarIA
 .extern f02SeleccionarYLanzarMisil
 .extern f02TurnoIA
@@ -86,8 +86,8 @@ f01FasePreparacion:
         BL f01ImprimirCadena
         BL f01ImprimirCadena
         
-        // Colocar barcos de la IA
-        BL f09ColocarBarcosIACompleto
+        // Colocar barcos de la IA (usando sistema nuevo)
+        BL f08ColocarTodosBarcosIA
         
         // [DEBUG TEMPORAL] Mostrar tablero enemigo con barcos revelados
         BL DEBUG_ImprimirTableroEnemigo

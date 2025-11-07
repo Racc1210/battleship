@@ -609,20 +609,23 @@ f06hay_solapamiento:
 // Ninguno
 // ***************************************************
 f07ColocarBarcoEnTablero:
-        stp x29, x30, [sp, -80]!
+        stp x29, x30, [sp, -96]!
         mov x29, sp
+        stp x19, x20, [sp, #16]
+        stp x21, x22, [sp, #32]
         
         // Guardar parámetros
-        STR x0, [sp, #16]       // Índice del barco
-        STR x1, [sp, #24]       // Fila proa
-        STR x2, [sp, #32]       // Columna proa
-        STR x3, [sp, #40]       // Fila popa
-        STR x4, [sp, #48]       // Columna popa
-        STR x5, [sp, #56]       // Tamaño
+        STR x0, [sp, #48]       // Índice del barco
+        STR x1, [sp, #56]       // Fila proa
+        STR x2, [sp, #64]       // Columna proa
+        STR x3, [sp, #72]       // Fila popa
+        STR x4, [sp, #80]       // Columna popa
+        STR x5, [sp, #88]       // Tamaño
         
         // Calcular ID del barco (índice + 1)
+        LDR x0, [sp, #48]       // Índice
         ADD x0, x0, #1          // ID = índice + 1
-        STR x0, [sp, #64]       // Guardar ID
+        MOV x22, x0             // Guardar ID en x22 para uso posterior
         
         // Inicializar contadores para este barco
         LDR x10, =ContadorImpactosJugador
@@ -636,96 +639,83 @@ f07ColocarBarcoEnTablero:
         STR x12, [x10]          // EstadoBarcos[ID] = 0 (activo)
         
         // Determinar orientación y marcar celdas
-        LDR x1, [sp, #24]       // Fila proa
-        LDR x3, [sp, #40]       // Fila popa
+        LDR x1, [sp, #56]       // Fila proa
+        LDR x3, [sp, #72]       // Fila popa
         CMP x1, x3
         BEQ f07marcar_horizontal
         
 f07marcar_vertical:
         // Asegurar orden correcto
-        LDR x1, [sp, #24]
-        LDR x3, [sp, #40]
+        LDR x1, [sp, #56]
+        LDR x3, [sp, #72]
         CMP x1, x3
         BLE f07vertical_ok
-        STR x3, [sp, #24]
-        STR x1, [sp, #40]
+        STR x3, [sp, #56]
+        STR x1, [sp, #72]
         
 f07vertical_ok:
-        LDR x1, [sp, #24]       // Fila inicio
-        LDR x3, [sp, #40]       // Fila fin
-        LDR x2, [sp, #32]       // Columna (fija)
+        LDR x19, [sp, #56]      // x19 = fila inicio
+        LDR x20, [sp, #72]      // x20 = fila fin
+        LDR x21, [sp, #64]      // x21 = columna (fija)
+        // x22 ya tiene id_barco
         
 f07loop_marcar_vertical:
-        CMP x1, x3
+        CMP x19, x20
         BGT f07fin_colocacion
-        
-        // Guardar registros antes de llamar
-        STR x1, [sp, #72]       // Guardar fila actual
-        STR x2, [sp, #76]       // Guardar columna fija
-        STR x3, [sp, #80]       // Guardar fila fin (no usar offset 80, excede 80!)
         
         // Preparar parámetros para f18ActualizarCeldaCompleta
         LDR x0, =TableroJugador
-        // x1 ya tiene fila
-        // x2 ya tiene columna
+        MOV x1, x19             // fila
+        MOV x2, x21             // columna
         LDR x3, =CELDA_DESCUBIERTO_SI
         LDR x3, [x3]            // descubierto = 1
         LDR x4, =CELDA_TIPO_BARCO
         LDR x4, [x4]            // tipo = 2
-        LDR x5, [sp, #64]       // id_barco
+        MOV x5, x22             // id_barco
         
         BL f18ActualizarCeldaCompleta
         
-        // Recuperar valores para siguiente iteración
-        LDR x1, [sp, #72]       // Recuperar fila
-        LDR x2, [sp, #76]       // Recuperar columna fija
-        LDR x3, [sp, #40]       // Recuperar fila fin del stack original
-        ADD x1, x1, #1          // Siguiente fila
+        ADD x19, x19, #1        // Siguiente fila
         B f07loop_marcar_vertical
 
 f07marcar_horizontal:
-        LDR x1, [sp, #24]       // Fila (fija)
-        LDR x2, [sp, #32]       // Columna proa
-        LDR x4, [sp, #48]       // Columna popa
+        LDR x1, [sp, #56]       // Fila (fija)
+        LDR x2, [sp, #64]       // Columna proa
+        LDR x4, [sp, #80]       // Columna popa
         CMP x2, x4
         BLE f07horizontal_ok
-        STR x4, [sp, #32]
-        STR x2, [sp, #48]
+        STR x4, [sp, #64]
+        STR x2, [sp, #80]
         
 f07horizontal_ok:
-        LDR x1, [sp, #24]       // Fila (fija)
-        LDR x2, [sp, #32]       // Columna inicio
-        LDR x4, [sp, #48]       // Columna fin
+        LDR x19, [sp, #56]      // x19 = fila (fija)
+        LDR x20, [sp, #64]      // x20 = columna inicio
+        LDR x21, [sp, #80]      // x21 = columna fin
+        // x22 ya tiene id_barco
         
 f07loop_marcar_horizontal:
-        CMP x2, x4
+        CMP x20, x21
         BGT f07fin_colocacion
-        
-        // Guardar registros
-        STR x1, [sp, #72]       // Guardar fila fija
-        STR x2, [sp, #76]       // Guardar columna actual
         
         // Preparar parámetros para f18ActualizarCeldaCompleta
         LDR x0, =TableroJugador
-        // x1 ya tiene fila
-        // x2 ya tiene columna
+        MOV x1, x19             // fila
+        MOV x2, x20             // columna
         LDR x3, =CELDA_DESCUBIERTO_SI
         LDR x3, [x3]            // descubierto = 1
         LDR x4, =CELDA_TIPO_BARCO
         LDR x4, [x4]            // tipo = 2
-        LDR x5, [sp, #64]       // id_barco
+        MOV x5, x22             // id_barco
         
         BL f18ActualizarCeldaCompleta
         
-        // Recuperar valores para siguiente iteración
-        LDR x1, [sp, #72]       // Recuperar fila fija
-        LDR x2, [sp, #76]       // Recuperar columna actual
-        LDR x4, [sp, #48]       // Recuperar columna fin del stack original
-        ADD x2, x2, #1          // Siguiente columna
+        ADD x20, x20, #1        // Siguiente columna
         B f07loop_marcar_horizontal
 
 f07fin_colocacion:
-        ldp x29, x30, [sp], 80
+        ldp x21, x22, [sp, #32]
+        ldp x19, x20, [sp, #16]
+        ldp x29, x30, [sp], 96
         RET
 
 

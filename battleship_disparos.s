@@ -24,6 +24,8 @@
 .global f06ObtenerBarcoEnCelda
 
 // Dependencias externas
+.extern f01ImprimirCadena
+.extern f11ImprimirNumero
 .extern f06ObtenerEstadoCelda
 .extern f07ActualizarCelda
 .extern TableroJugador, TableroComputadora
@@ -34,6 +36,7 @@
 .extern ESTADO_DESCONOCIDA, ESTADO_ENEMIGO_AGUA, ESTADO_ENEMIGO_BARCO
 .extern BARCO_ACTIVO, BARCO_HUNDIDO
 .extern NUM_BARCOS
+.extern MensajeDebugTamano, MensajeDebugImpactos, SaltoLinea
 
 .section .text
 
@@ -344,7 +347,7 @@ f03VerificarBarcoHundido:
         BL f01ImprimirCadena
         
         LDR x0, [sp, #24]       // Tamaño
-        BL f02ImprimirNumero
+        BL f11ImprimirNumero
         
         LDR x1, =SaltoLinea
         MOV x2, #1
@@ -356,7 +359,7 @@ f03VerificarBarcoHundido:
         BL f01ImprimirCadena
         
         LDR x0, [sp, #28]       // Impactos
-        BL f02ImprimirNumero
+        BL f11ImprimirNumero
         
         LDR x1, =SaltoLinea
         MOV x2, #1

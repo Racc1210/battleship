@@ -153,11 +153,16 @@ SimboloTorpedo:      .asciz "T"  // Trayectoria de torpedo
 // SÍMBOLOS DE INTERFAZ
 // ============================================
 .global Espacio, SaltoLinea, Separador, DosPuntos
+.global MensajeDebugTamano, MensajeDebugImpactos
 
 Espacio:     .asciz " "
 SaltoLinea:  .asciz "\n"
 Separador:   .asciz " | "
 DosPuntos:   .asciz ": "
+
+// Mensajes de debug
+MensajeDebugTamano:   .asciz "Tamaño: "
+MensajeDebugImpactos: .asciz "Impactos: "
 
 // ============================================
 // CÓDIGOS ANSI PARA COLORES (opcional)
@@ -393,14 +398,24 @@ LargoMenuPatronApacheVal: .quad 90
 // ============================================
 .global MenuDireccionTorpedo, LargoMenuDireccionTorpedoVal
 .global ErrorOrigenTorpedo, LargoErrorOrigenTorpedoVal
+.global MensajeTorpedoColumna, LargoMensajeTorpedoColumnaVal
+.global MensajeTorpedoFila, LargoMensajeTorpedoFilaVal
 
 MenuDireccionTorpedo:
     .asciz "\n  Seleccione direccion del torpedo:\n    1. Norte (desde fila A hacia abajo)\n    2. Sur (desde fila J hacia arriba)\n    3. Este (desde columna 14 hacia izquierda)\n    4. Oeste (desde columna 1 hacia derecha)\n  Opcion: "
 LargoMenuDireccionTorpedoVal: .quad 191
 
 ErrorOrigenTorpedo:
-    .asciz "\n ERROR: El torpedo debe lanzarse desde el borde del tablero\n         en la direccion especificada\n"
-LargoErrorOrigenTorpedoVal: .quad 99
+    .asciz "\n ERROR: Coordenada invalida para torpedo\n"
+LargoErrorOrigenTorpedoVal: .quad 42
+
+MensajeTorpedoColumna:
+    .asciz "\n  Ingrese columna (1-14): "
+LargoMensajeTorpedoColumnaVal: .quad 26
+
+MensajeTorpedoFila:
+    .asciz "\n  Ingrese fila (A-J): "
+LargoMensajeTorpedoFilaVal: .quad 23
 
 // ============================================
 // MENSAJES DE SOLICITUD DE ATAQUE

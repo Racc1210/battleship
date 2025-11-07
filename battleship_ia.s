@@ -38,6 +38,8 @@
 .extern f01ProcesarDisparoEnCelda
 .extern f01ImprimirCadena
 .extern f02ImprimirTableroPropio
+.extern f09RegistrarUltimoAtaque
+.extern f10RegistrarAtaqueMultiple
 .extern TableroJugador, TableroComputadora
 .extern TableroDisparosComputadora, TableroDisparosJugador
 .extern BarcosJugador, BarcosComputadora
@@ -144,6 +146,9 @@ f02TurnoIA:
         BL f03SeleccionarCoordenadaIA
         STR x0, [sp, #16]       // Fila
         STR x1, [sp, #24]       // Columna
+        
+        // Registrar como último ataque (para colorear)
+        BL f09RegistrarUltimoAtaque
         
         LDR x0, =TableroJugador
         LDR x1, =TableroDisparosComputadora
@@ -1010,7 +1015,8 @@ f11fin_especial:
 // ******  Nombre  ***********************************
 // f12AplicarPatronIA
 // ******  Descripción  ******************************
-// Aplica un patrón de ataque de la IA.
+// Aplica un patrón de ataque de la IA y registra
+// todas las celdas atacadas para colorear.
 // ******  Retorno  **********************************
 // x0: Mejor resultado del patrón (0=agua, 1=impacto, 2=hundido)
 // ******  Entradas  *********************************
@@ -1021,7 +1027,7 @@ f11fin_especial:
 // Ninguno
 // ***************************************************
 f12AplicarPatronIA:
-        stp x29, x30, [sp, -80]!
+        stp x29, x30, [sp, -400]!
         mov x29, sp
         
         STR x0, [sp, #16]       // Patrón
@@ -1030,6 +1036,9 @@ f12AplicarPatronIA:
         MOV x20, x0             // Puntero al patrón
         MOV x21, #0             // Mejor resultado acumulado (0=agua)
         STR x21, [sp, #56]      // Guardar mejor resultado
+        MOV x24, #0             // Contador de celdas atacadas
+        STR x24, [sp, #64]      // Guardar contador
+        ADD x25, sp, #80        // Dirección del array de celdas atacadas
 
 f12loop_patron_ia:
         LDRSB w22, [x20]
@@ -1043,7 +1052,7 @@ f12loop_patron_ia:
         LDR x5, [sp, #16]
         CMP x20, x5
         BEQ f12procesar_celda_ia
-        B f12fin_patron_ia
+        B f12registrar_celdas_ia
 
 f12procesar_celda_ia:
         LDR x1, [sp, #24]       // Fila central
@@ -1063,6 +1072,15 @@ f12procesar_celda_ia:
         CMP x2, #13
         BGT f12siguiente_offset_ia
         
+        // Guardar coordenada en array temporal
+        LDR x24, [sp, #64]      // Contador actual
+        LSL x5, x24, #4         // × 16 (dos quads por celda)
+        ADD x5, x25, x5         // Dirección destino
+        STR x1, [x5]            // Fila
+        STR x2, [x5, #8]        // Columna
+        ADD x24, x24, #1
+        STR x24, [sp, #64]      // Actualizar contador
+        
         // Procesar disparo
         LDR x0, =TableroJugador
         STR x1, [sp, #40]
@@ -1075,7 +1093,6 @@ f12procesar_celda_ia:
         BL f01ProcesarDisparoEnCelda
         
         // Actualizar mejor resultado
-        // Si resultado actual > mejor resultado, actualizar
         LDR x1, [sp, #56]       // Mejor resultado actual
         CMP x0, x1
         BLE f12siguiente_offset_ia
@@ -1085,9 +1102,18 @@ f12siguiente_offset_ia:
         ADD x20, x20, #2
         B f12loop_patron_ia
 
+f12registrar_celdas_ia:
+        // Registrar todas las celdas atacadas
+        LDR x1, [sp, #64]       // Cantidad de celdas
+        CMP x1, #0
+        BLE f12fin_patron_ia
+        
+        MOV x0, x25             // Dirección del array
+        BL f10RegistrarAtaqueMultiple
+
 f12fin_patron_ia:
         LDR x0, [sp, #56]       // Retornar mejor resultado
-        ldp x29, x30, [sp], 80
+        ldp x29, x30, [sp], 400
         RET
 
 

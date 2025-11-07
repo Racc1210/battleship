@@ -317,8 +317,12 @@ f05IncrementarImpactosBarco:
 // Ninguno
 // ***************************************************
 f03VerificarBarcoHundido:
-        stp x29, x30, [sp, -16]!
+        stp x29, x30, [sp, -32]!
         mov x29, sp
+        
+        // Guardar parámetros para debug
+        STR x0, [sp, #16]
+        STR x1, [sp, #24]
         
         // Calcular dirección del barco
         MOV x2, #40
@@ -329,6 +333,41 @@ f03VerificarBarcoHundido:
         LDRB w1, [x0, #1]       // Tamaño
         LDRB w2, [x0, #7]       // Impactos
         
+        // === DEBUG: Imprimir valores ===
+        STR x0, [sp, #16]       // Guardar dirección
+        STR x1, [sp, #24]       // Guardar tamaño
+        STR x2, [sp, #28]       // Guardar impactos
+        
+        // Imprimir tamaño
+        LDR x1, =MensajeDebugTamano
+        MOV x2, #9
+        BL f01ImprimirCadena
+        
+        LDR x0, [sp, #24]       // Tamaño
+        BL f02ImprimirNumero
+        
+        LDR x1, =SaltoLinea
+        MOV x2, #1
+        BL f01ImprimirCadena
+        
+        // Imprimir impactos
+        LDR x1, =MensajeDebugImpactos
+        MOV x2, #11
+        BL f01ImprimirCadena
+        
+        LDR x0, [sp, #28]       // Impactos
+        BL f02ImprimirNumero
+        
+        LDR x1, =SaltoLinea
+        MOV x2, #1
+        BL f01ImprimirCadena
+        
+        // Recuperar valores
+        LDR x0, [sp, #16]       // Dirección
+        LDR x1, [sp, #24]       // Tamaño
+        LDR x2, [sp, #28]       // Impactos
+        // === FIN DEBUG ===
+        
         // Comparar
         CMP w2, w1
         BLT f03aun_activo
@@ -338,12 +377,12 @@ f03VerificarBarcoHundido:
         STRB w3, [x0, #8]
         
         MOV x0, #1              // Hundido
-        ldp x29, x30, [sp], 16
+        ldp x29, x30, [sp], 32
         RET
 
 f03aun_activo:
         MOV x0, #0              // Aún activo
-        ldp x29, x30, [sp], 16
+        ldp x29, x30, [sp], 32
         RET
 
 

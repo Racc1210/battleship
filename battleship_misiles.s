@@ -31,6 +31,7 @@
 .global f10SeleccionarPatronApache
 .global f11SeleccionarDireccionTorpedo
 .global f12ValidarOrigenTorpedo
+.global f13LeerCoordenadaTorpedo
 .global f13DecrementarMunicion
 .global f14VerificarMunicionDisponible
 
@@ -42,6 +43,7 @@
 .extern f01ProcesarDisparoEnCelda
 .extern f11ImprimirNumero
 .extern f09RegistrarUltimoAtaque
+.extern f10RegistrarAtaqueMultiple
 .extern f12LimpiarUltimoAtaque
 .extern UltimoAtaqueCeldas, UltimoAtaqueCantidad
 .extern MunicionJugador, MunicionComputadora
@@ -61,6 +63,8 @@
 .extern MenuPatronApache, LargoMenuPatronApacheVal
 .extern MenuDireccionTorpedo, LargoMenuDireccionTorpedoVal
 .extern ErrorOrigenTorpedo, LargoErrorOrigenTorpedoVal
+.extern MensajeTorpedoColumna, LargoMensajeTorpedoColumnaVal
+.extern MensajeTorpedoFila, LargoMensajeTorpedoFilaVal
 .extern MensajeCoordenadaAtaque, LargoMensajeCoordenadaAtaqueVal
 .extern MensajeOpcionMisil, LargoMensajeOpcionMisilVal
 .extern MensajeAgua, LargoMensajeAguaVal
@@ -534,7 +538,7 @@ f06LanzarMisilApache:
 // Reintenta si origen/dirección inválidos
 // ***************************************************
 f07LanzarTorpedo:
-        stp x29, x30, [sp, -64]!
+        stp x29, x30, [sp, -480]!  // 480 bytes: 80 vars + 400 buffer celdas
         mov x29, sp
         
 f07solicitar_direccion:
@@ -542,31 +546,24 @@ f07solicitar_direccion:
         BL f11SeleccionarDireccionTorpedo
         STR x0, [sp, #16]       // Dirección (0=N, 1=S, 2=E, 3=O)
         
-        // Solicitar coordenada de lanzamiento
-        LDR x1, =MensajeCoordenadaAtaque
-        LDR x2, =LargoMensajeCoordenadaAtaqueVal
-        LDR x2, [x2]
-        BL f01ImprimirCadena
-        
-        BL f12LeerCoordenada
+        // Leer coordenada específica según dirección
+        BL f13LeerCoordenadaTorpedo
         STR x0, [sp, #24]       // Fila origen
         STR x1, [sp, #32]       // Columna origen
-        
-        // Validar origen y dirección
-        LDR x0, [sp, #24]
-        LDR x1, [sp, #32]
-        LDR x2, [sp, #16]
-        BL f12ValidarOrigenTorpedo
-        CMP x0, #0
-        BEQ f07origen_invalido
 
 f07iniciar_torpedo:
+        // Limpiar registro de último ataque
+        BL f12LimpiarUltimoAtaque
+        
         // Recorrer en la dirección especificada
         LDR x19, [sp, #24]      // Fila actual
         LDR x20, [sp, #32]      // Columna actual
         LDR x21, [sp, #16]      // Dirección
         MOV x22, #0             // Resultado inicial (AGUA)
         STR x22, [sp, #40]      // Guardar resultado inicial
+        MOV x23, #0             // Contador de celdas atacadas
+        STR x23, [sp, #48]      // Guardar contador
+        ADD x24, sp, #80        // Dirección del buffer de celdas (400 bytes desde sp+80)
         
 f07recorrer_torpedo:
         // Avanzar según dirección
@@ -597,13 +594,22 @@ f07avanzar_oeste:
 f07verificar_celda:
         // Verificar límites del tablero 10x14 (filas 0-9, columnas 0-13)
         CMP x19, #0
-        BLT f07fin_torpedo
+        BLT f07registrar_y_terminar
         CMP x19, #9
-        BGT f07fin_torpedo
+        BGT f07registrar_y_terminar
         CMP x20, #0
-        BLT f07fin_torpedo
+        BLT f07registrar_y_terminar
         CMP x20, #13
-        BGT f07fin_torpedo
+        BGT f07registrar_y_terminar
+        
+        // Guardar coordenada en buffer
+        LDR x23, [sp, #48]      // Contador actual
+        LSL x5, x23, #4         // × 16 (dos quads)
+        ADD x5, x24, x5         // Dirección destino
+        STR x19, [x5]           // Fila
+        STR x20, [x5, #8]       // Columna
+        ADD x23, x23, #1
+        STR x23, [sp, #48]      // Actualizar contador
         
         // Procesar celda actual
         LDR x0, =TableroComputadora
@@ -623,14 +629,17 @@ f07verificar_celda:
 
 f07impacto_torpedo:
         STR x0, [sp, #40]
-        B f07fin_torpedo
+        B f07registrar_y_terminar
 
-f07origen_invalido:
-        LDR x1, =ErrorOrigenTorpedo
-        LDR x2, =LargoErrorOrigenTorpedoVal
-        LDR x2, [x2]
-        BL f01ImprimirCadena
-        B f07solicitar_direccion
+f07registrar_y_terminar:
+        // Registrar todas las celdas atacadas
+        LDR x1, [sp, #48]       // Cantidad
+        CMP x1, #0
+        BLE f07fin_torpedo
+        
+        MOV x0, x24             // Buffer de coordenadas
+        BL f10RegistrarAtaqueMultiple
+        B f07fin_torpedo
 
 f07fin_torpedo:
         // Decrementar munición
@@ -638,7 +647,7 @@ f07fin_torpedo:
         BL f13DecrementarMunicion
         
         LDR x0, [sp, #40]
-        ldp x29, x30, [sp], 64
+        ldp x29, x30, [sp], 480
         RET
 
 
@@ -980,6 +989,142 @@ f12validar_oeste:
 f12invalido:
         MOV x0, #0
         ldp x29, x30, [sp], 16
+        RET
+
+
+// ******  Nombre  ***********************************
+// f13LeerCoordenadaTorpedo
+// ******  Descripción  ******************************
+// Lee coordenada específica para torpedo según
+// la dirección seleccionada:
+// - Norte/Sur: Solo columna (fila fija en borde)
+// - Este/Oeste: Solo fila (columna fija en borde)
+// ******  Retorno  **********************************
+// x0: Fila (calculada según dirección)
+// x1: Columna (calculada según dirección)
+// ******  Entradas  *********************************
+// x0: Dirección (0=Norte, 1=Sur, 2=Este, 3=Oeste)
+// ******  Errores  **********************************
+// Reintenta si entrada inválida
+// ***************************************************
+.global f13LeerCoordenadaTorpedo
+f13LeerCoordenadaTorpedo:
+        stp x29, x30, [sp, -32]!
+        mov x29, sp
+        
+        STR x0, [sp, #16]       // Guardar dirección
+        
+        CMP x0, #0              // Norte
+        BEQ f13leer_columna
+        CMP x0, #1              // Sur
+        BEQ f13leer_columna
+        CMP x0, #2              // Este
+        BEQ f13leer_fila
+        CMP x0, #3              // Oeste
+        BEQ f13leer_fila
+        
+        // Dirección inválida, usar columna por defecto
+        B f13leer_columna
+
+f13leer_columna:
+        // Pedir columna (1-14)
+        LDR x1, =MensajeTorpedoColumna
+        LDR x2, =LargoMensajeTorpedoColumnaVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
+        BL f03LeerNumero
+        
+        // Validar rango (1-14)
+        CMP x0, #1
+        BLT f13columna_invalida
+        CMP x0, #14
+        BGT f13columna_invalida
+        
+        // Convertir a índice 0-13
+        SUB x1, x0, #1          // Columna en x1
+        
+        // Determinar fila según dirección
+        LDR x0, [sp, #16]
+        CMP x0, #0              // Norte: fila = 0
+        BEQ f13fila_norte
+        
+        // Sur: fila = 9
+        MOV x0, #9
+        B f13retornar
+
+f13fila_norte:
+        MOV x0, #0
+        B f13retornar
+
+f13columna_invalida:
+        LDR x1, =ErrorOrigenTorpedo
+        LDR x2, =LargoErrorOrigenTorpedoVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        B f13leer_columna
+
+f13leer_fila:
+        // Pedir fila (A-J)
+        LDR x1, =MensajeTorpedoFila
+        LDR x2, =LargoMensajeTorpedoFilaVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
+        // Leer usando el buffer temporal del stack
+        SUB sp, sp, #16         // Espacio para buffer
+        MOV x1, sp
+        MOV x2, #3              // Leer hasta 3 caracteres
+        MOV x8, #63             // syscall read
+        MOV x0, #0              // stdin
+        SVC #0
+        
+        // Obtener primer carácter
+        LDRB w0, [sp]
+        
+        // Convertir a mayúscula si es minúscula
+        CMP w0, #'a'
+        BLT f13ya_mayuscula
+        CMP w0, #'z'
+        BGT f13ya_mayuscula
+        SUB w0, w0, #32         // Convertir a mayúscula
+
+f13ya_mayuscula:
+        // Validar rango (A-J)
+        CMP w0, #'A'
+        BLT f13fila_invalida
+        CMP w0, #'J'
+        BGT f13fila_invalida
+        
+        // Convertir a índice (A=0, B=1, ..., J=9)
+        SUB w0, w0, #'A'
+        SXTW x0, w0             // Extender a 64 bits
+        
+        ADD sp, sp, #16         // Limpiar buffer
+        
+        // Determinar columna según dirección
+        LDR x1, [sp, #16]
+        CMP x1, #2              // Este: columna = 13
+        BEQ f13columna_este
+        
+        // Oeste: columna = 0
+        MOV x1, #0
+        B f13retornar
+
+f13columna_este:
+        MOV x1, #13
+        B f13retornar
+
+f13fila_invalida:
+        ADD sp, sp, #16         // Limpiar buffer
+        LDR x1, =ErrorOrigenTorpedo
+        LDR x2, =LargoErrorOrigenTorpedoVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        B f13leer_fila
+
+f13retornar:
+        ldp x29, x30, [sp], 32
         RET
 
 

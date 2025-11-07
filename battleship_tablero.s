@@ -532,13 +532,13 @@ f02imprimir_agua_impactada:
 f02agua_impactada_amarillo:
         // Amarillo para último ataque
         LDR x1, =ColorAmarillo
-        MOV x2, #4
+        MOV x2, #5              // \033[33m = 5 bytes
         BL f01ImprimirCadena
         LDR x1, =SimboloAguaImpactada
         MOV x2, #1
         BL f01ImprimirCadena
         LDR x1, =ColorReset
-        MOV x2, #4
+        MOV x2, #4              // \033[0m = 4 bytes
         BL f01ImprimirCadena
         B f02siguiente_columna
         
@@ -558,26 +558,26 @@ f02imprimir_barco_impactado:
         
         // Rojo para barco impactado (ataque enemigo anterior)
         LDR x1, =ColorRojo
-        MOV x2, #5
+        MOV x2, #5              // \033[31m = 5 bytes
         BL f01ImprimirCadena
         LDR x1, =SimboloBarcoImpactado
         MOV x2, #1
         BL f01ImprimirCadena
         LDR x1, =ColorReset
-        MOV x2, #4
+        MOV x2, #4              // \033[0m = 4 bytes
         BL f01ImprimirCadena
         B f02siguiente_columna
         
 f02barco_impactado_amarillo:
         // Amarillo para último ataque
         LDR x1, =ColorAmarillo
-        MOV x2, #4
+        MOV x2, #5              // \033[33m = 5 bytes
         BL f01ImprimirCadena
         LDR x1, =SimboloBarcoImpactado
         MOV x2, #1
         BL f01ImprimirCadena
         LDR x1, =ColorReset
-        MOV x2, #4
+        MOV x2, #4              // \033[0m = 4 bytes
         BL f01ImprimirCadena
         
 f02siguiente_columna:

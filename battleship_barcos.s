@@ -40,9 +40,11 @@
 .extern f18ActualizarCeldaCompleta
 .extern f02ImprimirTableroPropio
 .extern f10ParsearCoordenada
+.extern f11ImprimirNumero
 .extern f12LeerCoordenada
 .extern f02NumeroAleatorio
 .extern f05LimpiarPantalla
+.extern f16ObtenerTipo
 .extern TableroJugador, TableroComputadora
 .extern ContadorImpactosJugador, ContadorImpactosComputadora
 .extern EstadoBarcosJugador, EstadoBarcosComputadora
@@ -71,6 +73,8 @@
 .extern ErrorDistancia, LargoErrorDistanciaVal
 .extern ErrorSolapamiento, LargoErrorSolapamientoVal
 .extern MensajePresionarEnter, LargoMensajePresionarEnterVal
+.extern MensajeDebugRetorno, MensajeDebugTamano, MensajeDebugImpactos
+.extern Espacio, SaltoLinea
 
 // Sección de datos no inicializados
 .section .bss
@@ -589,6 +593,13 @@ f07ColocarBarcoEnTablero:
         stp x19, x20, [sp, #16]
         stp x21, x22, [sp, #32]
         
+        // DEBUG: Imprimir mensaje de entrada
+        SUB sp, sp, #32
+        LDR x1, =MensajeDebugRetorno
+        MOV x2, #41
+        BL f01ImprimirCadena
+        ADD sp, sp, #32
+        
         // Guardar parámetros
         STR x0, [sp, #48]       // Índice del barco
         STR x1, [sp, #56]       // Fila proa
@@ -597,10 +608,36 @@ f07ColocarBarcoEnTablero:
         STR x4, [sp, #80]       // Columna popa
         STR x5, [sp, #88]       // Tamaño
         
+        // DEBUG: Imprimir coordenadas recibidas
+        SUB sp, sp, #32
+        MOV x0, x1              // Fila proa
+        BL f11ImprimirNumero
+        LDR x1, =Espacio
+        MOV x2, #1
+        BL f01ImprimirCadena
+        LDR x0, [sp, #64+32]    // Columna proa (ajustar por sub sp)
+        BL f11ImprimirNumero
+        LDR x1, =SaltoLinea
+        MOV x2, #1
+        BL f01ImprimirCadena
+        ADD sp, sp, #32
+        
         // Calcular ID del barco (índice + 1)
         LDR x0, [sp, #48]       // Índice
         ADD x0, x0, #1          // ID = índice + 1
         MOV x22, x0             // Guardar ID en x22 para uso posterior
+        
+        // DEBUG: Imprimir ID calculado
+        SUB sp, sp, #32
+        LDR x1, =MensajeDebugTamano
+        MOV x2, #9
+        BL f01ImprimirCadena
+        MOV x0, x22
+        BL f11ImprimirNumero
+        LDR x1, =SaltoLinea
+        MOV x2, #1
+        BL f01ImprimirCadena
+        ADD sp, sp, #32
         
         // Inicializar contadores para este barco
         LDR x10, =ContadorImpactosJugador
@@ -634,9 +671,33 @@ f07vertical_ok:
         LDR x21, [sp, #64]      // x21 = columna (fija)
         // x22 ya tiene id_barco
         
+        // DEBUG: Entrar en loop vertical
+        SUB sp, sp, #32
+        LDR x1, =MensajeDebugImpactos
+        MOV x2, #11
+        BL f01ImprimirCadena
+        LDR x1, =SaltoLinea
+        MOV x2, #1
+        BL f01ImprimirCadena
+        ADD sp, sp, #32
+        
 f07loop_marcar_vertical:
         CMP x19, x20
         BGT f07fin_colocacion
+        
+        // DEBUG: Imprimir celda actual
+        SUB sp, sp, #32
+        MOV x0, x19
+        BL f11ImprimirNumero
+        LDR x1, =Espacio
+        MOV x2, #1
+        BL f01ImprimirCadena
+        MOV x0, x21
+        BL f11ImprimirNumero
+        LDR x1, =SaltoLinea
+        MOV x2, #1
+        BL f01ImprimirCadena
+        ADD sp, sp, #32
         
         // Preparar parámetros para f18ActualizarCeldaCompleta
         LDR x0, =TableroJugador

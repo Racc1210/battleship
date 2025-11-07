@@ -48,6 +48,7 @@
 .extern TableroJugador, TableroComputadora
 .extern ContadorImpactosJugador, ContadorImpactosComputadora
 .extern EstadoBarcosJugador, EstadoBarcosComputadora
+.extern TamanosPorID
 .extern FILAS, COLUMNAS
 .extern ESTADO_BARCO
 .extern CELDA_DESCUBIERTO_NO, CELDA_DESCUBIERTO_SI
@@ -880,8 +881,8 @@ f09colocar_ia:
         ADD x2, x2, x3
         STR xzr, [x2]
         
-        // Inicializar TamanosPorID[id] = tamaño
-        LDR x2, =TamanosPorIDComputadora
+        // Inicializar TamanosPorID[id] = tamaño (array compartido)
+        LDR x2, =TamanosPorID
         ADD x2, x2, x3
         STR x20, [x2]           // Guardar tamaño
         

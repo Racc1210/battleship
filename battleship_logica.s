@@ -88,35 +88,24 @@ f01FasePreparacion:
         BL f01ImprimirCadena
         BL f01ImprimirCadena
         
-        // Colocar barcos de la IA (usando sistema nuevo)
         BL f08ColocarTodosBarcosIA
         
-        // Esperar ENTER para continuar
-        LDR x1, =MensajePresionarEnter
-        LDR x2, =LargoMensajePresionarEnterVal
-        LDR x2, [x2]
-        BL f01ImprimirCadena
-        LDR x1, =BufferLectura
-        MOV x2, #10
-        BL f02LeerCadena
-        
-        // Inicializar estado de la IA
+        // Mostrar tablero enemigo con barcos revelados
+        //BL DEBUG_ImprimirTableroEnemigo
+
         BL f01InicializarIA
         
-        // Resetear flag de juego terminado
         LDR x0, =JuegoTerminado
         MOV x1, #0
         STR x1, [x0]
         
-        // Mensaje para comenzar
         LDR x1, =MensajePresionarEnter
         LDR x2, =LargoMensajePresionarEnterVal
         LDR x2, [x2]
         BL f01ImprimirCadena
         
-        // Esperar Enter (leer y descartar)
-        MOV x8, #63             // Syscall read
-        MOV x0, #0              // stdin
+        MOV x8, #63            
+        MOV x0, #0             
         SUB sp, sp, #16
         MOV x1, sp
         MOV x2, #2
@@ -145,26 +134,22 @@ f02BucleEnfrentamiento:
         mov x29, sp
         
 f02loop_juego:
-        // Verificar si el juego terminó
+
         LDR x0, =JuegoTerminado
         LDR x0, [x0]
         CMP x0, #0
         BNE f02fin_juego
         
-        // Limpiar pantalla antes del turno del jugador
         BL f05LimpiarPantalla
         
-        // Turno del jugador
         BL f03TurnoJugador
         
-        // Verificar victoria del jugador
         BL f04VerificarFinDeJuego
         LDR x0, =JuegoTerminado
         LDR x0, [x0]
         CMP x0, #0
         BNE f02fin_juego
         
-        // Pequeña pausa
         LDR x1, =MensajePresionarEnter
         LDR x2, =LargoMensajePresionarEnterVal
         LDR x2, [x2]
@@ -178,10 +163,8 @@ f02loop_juego:
         SVC #0
         ADD sp, sp, #16
         
-        // Limpiar antes del turno enemigo
         BL f05LimpiarPantalla
         
-        // Turno de la IA
         LDR x1, =MensajeTurnoEnemigo
         LDR x2, =LargoMensajeTurnoEnemigoVal
         LDR x2, [x2]
@@ -189,14 +172,12 @@ f02loop_juego:
         
         BL f02TurnoIA
         
-        // Verificar victoria de la IA
         BL f04VerificarFinDeJuego
         LDR x0, =JuegoTerminado
         LDR x0, [x0]
         CMP x0, #0
         BNE f02fin_juego
         
-        // Pequeña pausa
         LDR x1, =MensajePresionarEnter
         LDR x2, =LargoMensajePresionarEnterVal
         LDR x2, [x2]
@@ -213,7 +194,6 @@ f02loop_juego:
         B f02loop_juego
 
 f02fin_juego:
-        // Mostrar resultado final
         BL f05MostrarResultadoFinal
         
         ldp x29, x30, [sp], 16
@@ -239,22 +219,17 @@ f03TurnoJugador:
         stp x29, x30, [sp, -16]!
         mov x29, sp
         
-        // Limpiar pantalla
         BL f05LimpiarPantalla
         
-        // Mostrar mensaje de turno
         LDR x1, =MensajeTurnoJugador
         LDR x2, =LargoMensajeTurnoJugadorVal
         LDR x2, [x2]
         BL f01ImprimirCadena
         
-        // Mostrar tableros
         BL f04ImprimirAmbosTableros
         
-        // Seleccionar y lanzar misil
         BL f02SeleccionarYLanzarMisil
         
-        // Mostrar tablero enemigo actualizado
         BL f03ImprimirTableroEnemigo
         
         ldp x29, x30, [sp], 16
@@ -278,40 +253,35 @@ f04VerificarFinDeJuego:
         stp x29, x30, [sp, -32]!
         mov x29, sp
         
-        // Contar barcos hundidos del jugador
         LDR x0, =EstadoBarcosJugador
         BL f04ContarBarcosHundidos
-        STR x0, [sp, #16]       // Guardar barcos hundidos del jugador
+        STR x0, [sp, #16]       
         
-        // Contar barcos hundidos de la computadora
         LDR x0, =EstadoBarcosComputadora
         BL f04ContarBarcosHundidos
-        STR x0, [sp, #24]       // Guardar barcos hundidos de la IA
+        STR x0, [sp, #24]     
         
-        // Verificar si el jugador perdió (5 barcos hundidos)
         LDR x0, [sp, #16]
         CMP x0, #5
         BEQ f04jugador_perdio
         
-        // Verificar si la IA perdió (5 barcos hundidos)
         LDR x0, [sp, #24]
         CMP x0, #5
         BEQ f04jugador_gano
         
-        // El juego continúa
         ldp x29, x30, [sp], 32
         RET
 
 f04jugador_gano:
         LDR x0, =JuegoTerminado
-        MOV x1, #1              // Victoria del jugador
+        MOV x1, #1              
         STR x1, [x0]
         ldp x29, x30, [sp], 32
         RET
 
 f04jugador_perdio:
         LDR x0, =JuegoTerminado
-        MOV x1, #2              // Victoria de la IA
+        MOV x1, #2              
         STR x1, [x0]
         ldp x29, x30, [sp], 32
         RET
@@ -377,7 +347,7 @@ f05mostrar_derrota:
         LDR x2, [x2]
         BL f01ImprimirCadena
         
-        // Esperar ENTER
+
         LDR x1, =MensajePresionarEnter
         LDR x2, =LargoMensajePresionarEnterVal
         LDR x2, [x2]
@@ -390,7 +360,3 @@ f05mostrar_derrota:
         ldp x29, x30, [sp], 16
         RET
 
-
-// ============================================
-// FIN DEL ARCHIVO
-// ============================================

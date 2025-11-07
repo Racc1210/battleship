@@ -519,8 +519,8 @@ LargoMenuPatronApacheVal: .quad 90
 .global MensajeTorpedoFila, LargoMensajeTorpedoFilaVal
 
 MenuDireccionTorpedo:
-    .asciz "\n  Seleccione direccion del torpedo:\n    1. Norte (desde fila A hacia abajo)\n    2. Sur (desde fila J hacia arriba)\n    3. Este (desde columna 14 hacia izquierda)\n    4. Oeste (desde columna 1 hacia derecha)\n  Opcion: "
-LargoMenuDireccionTorpedoVal: .quad 218
+    .asciz "\n  Seleccione direccion del torpedo:\n    1. Norte\n    2. Sur\n    3. Este\n    4. Oeste\n  Opcion: "
+LargoMenuDireccionTorpedoVal: .quad 96
 
 ErrorOrigenTorpedo:
     .asciz "\n ERROR: Coordenada invalida para torpedo\n"

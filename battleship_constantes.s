@@ -532,11 +532,11 @@ LargoMensajeAguaVal: .quad 26
 
 MensajeImpacto:
     .asciz "\n\033[33m IMPACTO!\033[0m Has golpeado un barco enemigo\n"
-LargoMensajeImpactoVal: .quad 52
+LargoMensajeImpactoVal: .quad 51
 
 MensajeHundido:
     .asciz "\n\033[32m BARCO HUNDIDO!\033[0m Has destruido una embarcacion enemiga\n"
-LargoMensajeHundidoVal: .quad 65
+LargoMensajeHundidoVal: .quad 64
 
 // Nombres de barcos para mensajes detallados
 .global NombrePortaviones, NombreAcorazado, NombreDestructor

@@ -91,9 +91,6 @@ f01FasePreparacion:
         // Colocar barcos de la IA (usando sistema nuevo)
         BL f08ColocarTodosBarcosIA
         
-        // [DEBUG TEMPORAL] Mostrar tablero enemigo con barcos revelados
-        BL DEBUG_ImprimirTableroEnemigo
-        
         // Esperar ENTER para continuar
         LDR x1, =MensajePresionarEnter
         LDR x2, =LargoMensajePresionarEnterVal

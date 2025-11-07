@@ -313,16 +313,6 @@ f02solicitar_coordenadas:
         BL f05LimpiarPantalla
         BL f02ImprimirTableroPropio
         
-        // Pequeña pausa antes del siguiente barco
-        LDR x1, =MensajePresionarEnter
-        LDR x2, =LargoMensajePresionarEnterVal
-        LDR x2, [x2]
-        BL f01ImprimirCadena
-        
-        LDR x1, =BufferLectura
-        MOV x2, #10
-        BL f02LeerCadena
-        
         ldp x29, x30, [sp], 64
         RET
 

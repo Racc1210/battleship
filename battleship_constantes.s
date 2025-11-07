@@ -346,7 +346,7 @@ LargoMenuFinJuegoVal: .quad 103
 .global MensajeCreditos, LargoMensajeCreditosVal
 
 MensajeCreditos:
-    .asciz "\nDesarrollado por: Roymar Castillo\n    Institucion: Instituto Tecnologico de Costa Rica\n    Proyecto 3 - Battleship\n    Ano: 2025\n    Arquitectura de software\n      \n============================================================\n\n"
+    .asciz "\n             Desarrollado por: Roymar Castillo\n    Institucion: Instituto Tecnologico de Costa Rica\n    Proyecto 3 - Battleship\n    Ano: 2025\n    Arquitectura de software\n      \n============================================================\n\n"
 LargoMensajeCreditosVal: .quad 241
 
 // ============================================

@@ -659,21 +659,27 @@ f07loop_marcar_vertical:
         CMP x1, x3
         BGT f07fin_colocacion
         
-        // Actualizar celda con nueva estructura
-        LDR x0, =TableroJugador
-        // x1 = fila, x2 = columna
-        STR x1, [sp, #72]       // Guardar fila
+        // Guardar registros antes de llamar
+        STR x1, [sp, #72]       // Guardar fila actual
+        STR x2, [sp, #76]       // Guardar columna fija
+        STR x3, [sp, #80]       // Guardar fila fin (no usar offset 80, excede 80!)
         
+        // Preparar parámetros para f18ActualizarCeldaCompleta
+        LDR x0, =TableroJugador
+        // x1 ya tiene fila
+        // x2 ya tiene columna
         LDR x3, =CELDA_DESCUBIERTO_SI
-        LDR x3, [x3]            // descubierto = 1 (visible para jugador)
+        LDR x3, [x3]            // descubierto = 1
         LDR x4, =CELDA_TIPO_BARCO
-        LDR x4, [x4]            // tipo = 2 (barco)
+        LDR x4, [x4]            // tipo = 2
         LDR x5, [sp, #64]       // id_barco
         
         BL f18ActualizarCeldaCompleta
         
+        // Recuperar valores para siguiente iteración
         LDR x1, [sp, #72]       // Recuperar fila
-        LDR x2, [sp, #32]       // Recuperar columna
+        LDR x2, [sp, #76]       // Recuperar columna fija
+        LDR x3, [sp, #40]       // Recuperar fila fin del stack original
         ADD x1, x1, #1          // Siguiente fila
         B f07loop_marcar_vertical
 
@@ -695,11 +701,14 @@ f07loop_marcar_horizontal:
         CMP x2, x4
         BGT f07fin_colocacion
         
-        // Actualizar celda
-        LDR x0, =TableroJugador
-        STR x1, [sp, #72]       // Guardar fila
-        STR x2, [sp, #76]       // Guardar columna
+        // Guardar registros
+        STR x1, [sp, #72]       // Guardar fila fija
+        STR x2, [sp, #76]       // Guardar columna actual
         
+        // Preparar parámetros para f18ActualizarCeldaCompleta
+        LDR x0, =TableroJugador
+        // x1 ya tiene fila
+        // x2 ya tiene columna
         LDR x3, =CELDA_DESCUBIERTO_SI
         LDR x3, [x3]            // descubierto = 1
         LDR x4, =CELDA_TIPO_BARCO
@@ -708,8 +717,10 @@ f07loop_marcar_horizontal:
         
         BL f18ActualizarCeldaCompleta
         
-        LDR x1, [sp, #72]       // Recuperar fila
-        LDR x2, [sp, #76]       // Recuperar columna
+        // Recuperar valores para siguiente iteración
+        LDR x1, [sp, #72]       // Recuperar fila fija
+        LDR x2, [sp, #76]       // Recuperar columna actual
+        LDR x4, [sp, #48]       // Recuperar columna fin del stack original
         ADD x2, x2, #1          // Siguiente columna
         B f07loop_marcar_horizontal
 

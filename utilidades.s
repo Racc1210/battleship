@@ -22,6 +22,7 @@
 .global f04ValidarRango
 .global f05LimpiarPantalla
 .global Semilla
+.global BufferLectura
 
 // Declaraciones globales - Funciones nuevas para Battleship
 .global f06ConvertirLetraAFila

@@ -338,14 +338,8 @@ f03VerificarBarcoHundido:
         
         // === DEBUG: Imprimir valores ===
         STR x0, [sp, #16]       // Guardar dirección
-        
-        // Extender valores de byte a 64 bits antes de guardar
-        UXTB w1, w1             // Limpiar bits altos de w1
-        UXTB w2, w2             // Limpiar bits altos de w2
-        MOV x3, x1              // Copiar a registro de 64 bits
-        MOV x4, x2
-        STR x3, [sp, #24]       // Guardar tamaño (64 bits)
-        STR x4, [sp, #28]       // Guardar impactos (64 bits)
+        STR x1, [sp, #24]       // Guardar tamaño (word, no overlap)
+        STR x2, [sp, #32]       // Guardar impactos (word, offset correcto)
         
         // Imprimir tamaño
         LDR x1, =MensajeDebugTamano
@@ -353,23 +347,17 @@ f03VerificarBarcoHundido:
         BL f01ImprimirCadena
         
         LDR x0, [sp, #24]       // Tamaño
+        AND x0, x0, #0xFF       // Máscara para 1 byte
         BL f11ImprimirNumero
-        
-        LDR x1, =SaltoLinea
-        MOV x2, #1
-        BL f01ImprimirCadena
         
         // Imprimir impactos
         LDR x1, =MensajeDebugImpactos
         MOV x2, #11
         BL f01ImprimirCadena
         
-        LDR x0, [sp, #28]       // Impactos
+        LDR x0, [sp, #32]       // Impactos
+        AND x0, x0, #0xFF       // Máscara para 1 byte
         BL f11ImprimirNumero
-        
-        LDR x1, =SaltoLinea
-        MOV x2, #1
-        BL f01ImprimirCadena
         
         // Recuperar valores originales para comparación
         LDR x0, [sp, #16]       // Dirección

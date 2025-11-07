@@ -503,8 +503,10 @@ f06loop_vertical:
         STR x1, [sp, #56]
         
         // Obtener tipo de celda usando f16ObtenerTipo
-        LDR x3, =TableroJugador
-        // x0 = fila, x1 = columna (ya cargadas)
+        // f16 espera: x0=tablero, x1=fila, x2=columna
+        LDR x0, =TableroJugador
+        LDR x1, [sp, #48]       // fila
+        LDR x2, [sp, #56]       // columna
         BL f16ObtenerTipo       // Retorna tipo en x0
         
         // Verificar si es tipo BARCO (2)
@@ -515,6 +517,7 @@ f06loop_vertical:
         
         LDR x0, [sp, #48]
         LDR x1, [sp, #56]
+        LDR x2, [sp, #32]       // Recuperar fila fin
         ADD x0, x0, #1          // Siguiente fila
         B f06loop_vertical
 
@@ -543,8 +546,10 @@ f06loop_horizontal:
         STR x1, [sp, #56]
         
         // Obtener tipo de celda usando f16ObtenerTipo
-        LDR x4, =TableroJugador
-        // x0 = fila, x1 = columna (ya cargadas)
+        // f16 espera: x0=tablero, x1=fila, x2=columna
+        LDR x0, =TableroJugador
+        LDR x1, [sp, #48]       // fila
+        LDR x2, [sp, #56]       // columna
         BL f16ObtenerTipo       // Retorna tipo en x0
         
         // Verificar si es tipo BARCO (2)
@@ -555,7 +560,9 @@ f06loop_horizontal:
         
         LDR x0, [sp, #48]
         LDR x1, [sp, #56]
+        LDR x3, [sp, #40]       // Recuperar columna fin
         ADD x1, x1, #1          // Siguiente columna
+        B f06loop_horizontal
         B f06loop_horizontal
 
 f06sin_solapamiento:

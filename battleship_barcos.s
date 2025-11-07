@@ -763,40 +763,40 @@ f08ColocarTodosBarcosIA:
 // Ninguno (reintenta hasta encontrar posición válida)
 // ***************************************************
 f09ColocarBarcoAleatorio:
-        stp x29, x30, [sp, -48]!
+        stp x29, x30, [sp, -96]!
         mov x29, sp
+        stp x19, x20, [sp, #16]
+        stp x21, x22, [sp, #32]
+        stp x23, x24, [sp, #48]
+        stp x25, x26, [sp, #64]
         
-        STR x0, [sp, #16]       // Índice
-        STR x1, [sp, #24]       // Tamaño
+        MOV x19, x0             // x19 = Índice
+        MOV x20, x1             // x20 = Tamaño
         
 f09intentar_colocacion:
         // Generar orientación aleatoria (0 o 1)
         MOV x0, #2
         BL f02NumeroAleatorio
-        STR x0, [sp, #32]       // Orientación
+        MOV x21, x0             // x21 = Orientación
         
-        CMP x0, #0
+        CMP x21, #0
         BEQ f09generar_horizontal
         
 f09generar_vertical:
         // Vertical: fila aleatoria (0 a 10-tamaño), columna cualquiera
-        LDR x1, [sp, #24]       // Tamaño
         MOV x0, #10
-        SUB x0, x0, x1
+        SUB x0, x0, x20         // 10 - tamaño
         ADD x0, x0, #1
         BL f02NumeroAleatorio   // Fila inicio
-        STR x0, [sp, #40]       // Fila proa
+        MOV x22, x0             // x22 = Fila proa
         
         MOV x0, #14
         BL f02NumeroAleatorio   // Columna
-        STR x0, [sp, #48]       // Columna (constante)
+        MOV x23, x0             // x23 = Columna (constante)
         
         // Calcular fila popa
-        LDR x0, [sp, #40]
-        LDR x1, [sp, #24]
-        ADD x0, x0, x1
-        SUB x0, x0, #1
-        STR x0, [sp, #56]       // Fila popa
+        ADD x24, x22, x20       // fila + tamaño
+        SUB x24, x24, #1        // x24 = Fila popa
         
         B f09validar_ia
 
@@ -804,46 +804,36 @@ f09generar_horizontal:
         // Horizontal: fila cualquiera, columna aleatoria (0 a 14-tamaño)
         MOV x0, #10
         BL f02NumeroAleatorio
-        STR x0, [sp, #40]       // Fila (constante)
+        MOV x22, x0             // x22 = Fila (constante)
         
-        LDR x1, [sp, #24]
         MOV x0, #14
-        SUB x0, x0, x1
+        SUB x0, x0, x20         // 14 - tamaño
         ADD x0, x0, #1
         BL f02NumeroAleatorio
-        STR x0, [sp, #48]       // Columna proa
+        MOV x23, x0             // x23 = Columna proa
         
         // Calcular columna popa
-        LDR x0, [sp, #48]
-        LDR x1, [sp, #24]
-        ADD x0, x0, x1
-        SUB x0, x0, #1
-        STR x0, [sp, #56]       // Columna popa
+        ADD x24, x23, x20       // columna + tamaño
+        SUB x24, x24, #1        // x24 = Columna popa
         
 f09validar_ia:
         // Validar solapamiento en TableroComputadora
-        // Necesitamos verificar si las celdas están libres
-        LDR x0, [sp, #40]       // Fila proa
-        LDR x1, [sp, #48]       // Columna proa
-        LDR x2, [sp, #32]       // Orientación
-        CMP x2, #0
+        CMP x21, #0             // Verificar orientación
         BEQ f09validar_horizontal
         
 f09validar_vertical:
-        // Vertical: recorrer filas
-        LDR x2, [sp, #40]       // Fila inicio
-        LDR x3, [sp, #24]       // Tamaño
-        ADD x3, x2, x3          // Fila fin + 1
-        SUB x3, x3, #1          // Fila fin
-        LDR x1, [sp, #48]       // Columna (constante)
+        // Vertical: recorrer filas desde x22 hasta x24
+        MOV x25, x22            // x25 = fila actual (usar x25 temporalmente)
         
 f09loop_validar_vert:
-        CMP x2, x3
+        CMP x25, x24
         BGT f09colocar_ia       // Todas libres
         
-        // Verificar celda [x2, x1]
-        MOV x0, x2
-        LDR x4, =TableroComputadora
+        // Verificar celda [x25, x23]
+        // f16 espera: x0=tablero, x1=fila, x2=columna
+        LDR x0, =TableroComputadora
+        MOV x1, x25             // fila actual
+        MOV x2, x23             // columna (constante)
         BL f16ObtenerTipo
         
         LDR x5, =CELDA_TIPO_BARCO
@@ -851,23 +841,22 @@ f09loop_validar_vert:
         CMP x0, x5
         BEQ f09intentar_colocacion  // Solapamiento, reintentar
         
-        ADD x2, x2, #1
+        ADD x25, x25, #1
         B f09loop_validar_vert
         
 f09validar_horizontal:
-        // Horizontal: recorrer columnas
-        LDR x0, [sp, #40]       // Fila (constante)
-        LDR x1, [sp, #48]       // Columna inicio
-        LDR x3, [sp, #24]       // Tamaño
-        ADD x3, x1, x3          // Columna fin + 1
-        SUB x3, x3, #1          // Columna fin
+        // Horizontal: recorrer columnas desde x23 hasta x24
+        MOV x25, x23            // x25 = columna actual
         
 f09loop_validar_horiz:
-        CMP x1, x3
+        CMP x25, x24
         BGT f09colocar_ia       // Todas libres
         
-        // Verificar celda [x0, x1]
-        LDR x4, =TableroComputadora
+        // Verificar celda [x22, x25]
+        // f16 espera: x0=tablero, x1=fila, x2=columna
+        LDR x0, =TableroComputadora
+        MOV x1, x22             // fila (constante)
+        MOV x2, x25             // columna actual
         BL f16ObtenerTipo
         
         LDR x5, =CELDA_TIPO_BARCO
@@ -875,17 +864,12 @@ f09loop_validar_horiz:
         CMP x0, x5
         BEQ f09intentar_colocacion  // Solapamiento, reintentar
         
-        ADD x1, x1, #1
-        LDR x0, [sp, #40]       // Restaurar fila
+        ADD x25, x25, #1
         B f09loop_validar_horiz
 
 f09colocar_ia:
-        // Colocar barco en TableroComputadora
-        LDR x0, [sp, #16]       // Índice del barco
-        LDR x5, [sp, #24]       // Tamaño
-        
         // Inicializar ContadorImpactosComputadora[id] = 0
-        ADD x1, x0, #1          // id_barco = índice + 1
+        ADD x1, x19, #1         // id_barco = índice + 1
         LDR x2, =ContadorImpactosComputadora
         LSL x3, x1, #3          // × 8 bytes
         ADD x2, x2, x3
@@ -896,81 +880,67 @@ f09colocar_ia:
         ADD x2, x2, x3
         STR xzr, [x2]
         
+        // Inicializar TamanosPorID[id] = tamaño
+        LDR x2, =TamanosPorIDComputadora
+        ADD x2, x2, x3
+        STR x20, [x2]           // Guardar tamaño
+        
         // Marcar celdas según orientación
-        LDR x2, [sp, #32]       // Orientación
-        CMP x2, #0
+        CMP x21, #0
         BEQ f09marcar_horizontal
         
 f09marcar_vertical:
-        LDR x2, [sp, #40]       // Fila inicio
-        LDR x3, [sp, #24]       // Tamaño
-        ADD x3, x2, x3          // Fila fin + 1
-        SUB x3, x3, #1          // Fila fin
-        LDR x4, [sp, #48]       // Columna (constante)
-        ADD x6, x0, #1          // id_barco = índice + 1
+        // Vertical: marcar desde fila x22 hasta x24, columna x23
+        MOV x25, x22            // x25 = fila actual
+        ADD x26, x19, #1        // x26 = id_barco
         
 f09loop_marcar_vert:
-        CMP x2, x3
+        CMP x25, x24
         BGT f09fin_colocacion
         
-        // Actualizar celda [x2, x4] con [descubierto=0, tipo=2, id_barco=x6]
+        // Actualizar celda [x25, x23]
         LDR x0, =TableroComputadora
-        MOV x1, x2              // Fila
-        MOV x7, x4              // Columna (guardar)
-        STR x2, [sp, #48]       // Guardar fila
-        STR x3, [sp, #56]       // Guardar fin
-        
-        MOV x2, x7              // x2 = columna
+        MOV x1, x25             // fila
+        MOV x2, x23             // columna
         LDR x3, =CELDA_DESCUBIERTO_NO
         LDR x3, [x3]            // descubierto = 0 (oculto)
         LDR x4, =CELDA_TIPO_BARCO
         LDR x4, [x4]            // tipo = 2
-        MOV x5, x6              // id_barco
+        MOV x5, x26             // id_barco
         BL f18ActualizarCeldaCompleta
         
-        LDR x2, [sp, #48]       // Recuperar fila
-        LDR x3, [sp, #56]       // Recuperar fin
-        LDR x4, [sp, #48]       // Columna (recuperar del stack correcto)
-        MOV x4, x7              // Restaurar columna original
-        ADD x2, x2, #1
+        ADD x25, x25, #1        // Siguiente fila
         B f09loop_marcar_vert
         
 f09marcar_horizontal:
-        LDR x2, [sp, #40]       // Fila (constante)
-        LDR x3, [sp, #48]       // Columna inicio
-        LDR x4, [sp, #24]       // Tamaño
-        ADD x4, x3, x4          // Columna fin + 1
-        SUB x4, x4, #1          // Columna fin
-        ADD x6, x0, #1          // id_barco = índice + 1
+        // Horizontal: marcar fila x22, desde columna x23 hasta x24
+        MOV x25, x23            // x25 = columna actual
+        ADD x26, x19, #1        // x26 = id_barco
         
 f09loop_marcar_horiz:
-        CMP x3, x4
+        CMP x25, x24
         BGT f09fin_colocacion
         
-        // Actualizar celda [x2, x3] con [descubierto=0, tipo=2, id_barco=x6]
+        // Actualizar celda [x22, x25]
         LDR x0, =TableroComputadora
-        MOV x1, x2              // Fila
-        STR x2, [sp, #48]       // Guardar fila
-        STR x3, [sp, #56]       // Guardar columna
-        STR x4, [sp, #32]       // Guardar fin
-        
-        MOV x2, x3              // x2 = columna
+        MOV x1, x22             // fila
+        MOV x2, x25             // columna
         LDR x3, =CELDA_DESCUBIERTO_NO
         LDR x3, [x3]            // descubierto = 0 (oculto)
         LDR x4, =CELDA_TIPO_BARCO
         LDR x4, [x4]            // tipo = 2
-        MOV x5, x6              // id_barco
+        MOV x5, x26             // id_barco
         BL f18ActualizarCeldaCompleta
         
-        LDR x2, [sp, #48]       // Recuperar fila
-        LDR x3, [sp, #56]       // Recuperar columna
-        LDR x4, [sp, #32]       // Recuperar fin
-        ADD x3, x3, #1
+        ADD x25, x25, #1        // Siguiente columna
         B f09loop_marcar_horiz
 
 f09fin_colocacion:
-        
-        ldp x29, x30, [sp], 48
+        ldp x25, x26, [sp, #64]
+        ldp x23, x24, [sp, #48]
+        ldp x21, x22, [sp, #32]
+        ldp x19, x20, [sp, #16]
+        ldp x29, x30, [sp], 96
         RET
 
 

@@ -45,6 +45,8 @@
 .extern MensajeTurnoEnemigo, LargoMensajeTurnoEnemigoVal
 .extern MensajeVictoria, LargoMensajeVictoriaVal
 .extern MensajeDerrota, LargoMensajeDerrotaVal
+.extern MensajeVictoriaFinal, LargoMensajeVictoriaFinalVal
+.extern MensajeDerrotaFinal, LargoMensajeDerrotaFinalVal
 .extern SaltoLinea
 
 .section .bss
@@ -152,6 +154,9 @@ f02loop_juego:
         CMP x0, #0
         BNE f02fin_juego
         
+        // Limpiar pantalla antes del turno del jugador
+        BL f05LimpiarPantalla
+        
         // Turno del jugador
         BL f03TurnoJugador
         
@@ -176,8 +181,10 @@ f02loop_juego:
         SVC #0
         ADD sp, sp, #16
         
-        // Turno de la IA
+        // Limpiar antes del turno enemigo
         BL f05LimpiarPantalla
+        
+        // Turno de la IA
         LDR x1, =MensajeTurnoEnemigo
         LDR x2, =LargoMensajeTurnoEnemigoVal
         LDR x2, [x2]
@@ -347,18 +354,42 @@ f05MostrarResultadoFinal:
         RET
 
 f05mostrar_victoria:
-        LDR x1, =MensajeVictoria
-        LDR x2, =LargoMensajeVictoriaVal
+        // Usar mensaje de victoria final (más grande y bonito)
+        LDR x1, =MensajeVictoriaFinal
+        LDR x2, =LargoMensajeVictoriaFinalVal
         LDR x2, [x2]
         BL f01ImprimirCadena
+        
+        // Esperar ENTER
+        LDR x1, =MensajePresionarEnter
+        LDR x2, =LargoMensajePresionarEnterVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
+        LDR x1, =BufferLectura
+        MOV x2, #10
+        BL f02LeerCadena
+        
         ldp x29, x30, [sp], 16
         RET
 
 f05mostrar_derrota:
-        LDR x1, =MensajeDerrota
-        LDR x2, =LargoMensajeDerrotaVal
+        // Usar mensaje de derrota final (más grande y bonito)
+        LDR x1, =MensajeDerrotaFinal
+        LDR x2, =LargoMensajeDerrotaFinalVal
         LDR x2, [x2]
         BL f01ImprimirCadena
+        
+        // Esperar ENTER
+        LDR x1, =MensajePresionarEnter
+        LDR x2, =LargoMensajePresionarEnterVal
+        LDR x2, [x2]
+        BL f01ImprimirCadena
+        
+        LDR x1, =BufferLectura
+        MOV x2, #10
+        BL f02LeerCadena
+        
         ldp x29, x30, [sp], 16
         RET
 

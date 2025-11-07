@@ -272,6 +272,48 @@ MensajeBienvenida:
 LargoMensajeBienvenidaVal: .quad 429
 
 // ============================================
+// MENÚ PRINCIPAL
+// ============================================
+.global MenuPrincipal, LargoMenuPrincipalVal
+.global OpcionInvalida, LargoOpcionInvalidaVal
+
+MenuPrincipal:
+    .asciz "============================================================\n                     MENU PRINCIPAL                         \n============================================================\n\n  1. JUGAR\n  2. TUTORIAL\n  3. CREDITOS\n  4. SALIR\n\n  Seleccione una opcion (1-4): "
+LargoMenuPrincipalVal: .quad 239
+
+OpcionInvalida:
+    .asciz "\n  [!] Opcion invalida. Por favor ingrese 1, 2, 3 o 4.\n\n"
+LargoOpcionInvalidaVal: .quad 56
+
+// ============================================
+// PANTALLA DE TUTORIAL
+// ============================================
+.global TutorialCompleto, LargoTutorialCompletoVal
+
+TutorialCompleto:
+    .asciz "============================================================\n                        TUTORIAL                            \n============================================================\n\n  COMO JUGAR:\n  -----------\n  1. Coloca tus 5 barcos estrategicamente\n  2. Ingresa coordenadas de proa y popa (ej: A1 a A5)\n  3. Alterna turnos atacando al enemigo\n  4. Selecciona tipo de misil segun la situacion\n\n  COORDENADAS:\n  -----------\n  - Filas: A-J (10 filas)\n  - Columnas: 1-14 (14 columnas)\n  - Formato: [Letra][Numero] (ej: D7, J14, A1)\n\n  SIMBOLOS EN TABLERO PROPIO:\n  ---------------------------\n  ~  = Agua sin explorar\n  O  = Agua impactada por enemigo (fallo)\n  B  = Tu barco intacto\n  X  = Tu barco impactado\n\n  SIMBOLOS EN TABLERO ENEMIGO:\n  ----------------------------\n  .  = Zona sin explorar (niebla de guerra)\n  0  = Tu disparo al agua (fallo)\n  X  = Impacto confirmado en barco enemigo\n\n  BARCOS DISPONIBLES:\n  ------------------\n  - Portaviones (5): 2x Exocet\n  - Acorazado (4):   1x Tomahawk\n  - Destructor (3):  2x Apache\n  - Submarino (3):   2x Torpedo\n  - Patrullero (2):  Solo estandar\n\n  VICTORIA:\n  --------\n  Hunde los 5 barcos enemigos antes que destruyan los tuyos\n\n"
+LargoTutorialCompletoVal: .quad 1240
+
+// ============================================
+// PANTALLA DE FIN DE JUEGO
+// ============================================
+.global MensajeVictoriaFinal, LargoMensajeVictoriaFinalVal
+.global MensajeDerrotaFinal, LargoMensajeDerrotaFinalVal
+.global MenuFinJuego, LargoMenuFinJuegoVal
+
+MensajeVictoriaFinal:
+    .asciz "\n============================================================\n                                                            \n               ****  VICTORIA  ****                         \n                                                            \n     Has hundido toda la flota enemiga!                    \n     Felicitaciones, Comandante!                            \n                                                            \n============================================================\n\n"
+LargoMensajeVictoriaFinalVal: .quad 440
+
+MensajeDerrotaFinal:
+    .asciz "\n============================================================\n                                                            \n               ****  DERROTA  ****                          \n                                                            \n     Tu flota ha sido completamente destruida              \n     El enemigo ha ganado esta batalla...                  \n                                                            \n============================================================\n\n"
+LargoMensajeDerrotaFinalVal: .quad 438
+
+MenuFinJuego:
+    .asciz "  Que desea hacer?\n\n  1. Jugar de nuevo\n  2. Volver al menu principal\n  3. Salir del juego\n\n  Seleccione una opcion (1-3): "
+LargoMenuFinJuegoVal: .quad 139
+
+// ============================================
 // MENSAJE DE CRÉDITOS
 // ============================================
 .global MensajeCreditos, LargoMensajeCreditosVal
@@ -535,8 +577,8 @@ MensajeImpacto:
 LargoMensajeImpactoVal: .quad 51
 
 MensajeHundido:
-    .asciz "\n\033[32m BARCO HUNDIDO!\033[0m Has destruido una embarcacion enemiga\n"
-LargoMensajeHundidoVal: .quad 64
+    .asciz "\n\033[32m BARCO HUNDIDO!\033[0m Has destruido una embarcacion enemiga:\n"
+LargoMensajeHundidoVal: .quad 65
 
 // Nombres de barcos para mensajes detallados
 .global NombrePortaviones, NombreAcorazado, NombreDestructor
